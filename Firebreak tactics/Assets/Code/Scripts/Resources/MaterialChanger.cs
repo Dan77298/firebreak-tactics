@@ -4,10 +4,8 @@ using UnityEngine;
 
 public class MaterialChanger : MonoBehaviour
 {
-    [SerializeField]
-    private Renderer objectRenderer;
-    [SerializeField]
-    private TileType defaultTile;
+    [SerializeField] private Renderer objectRenderer;
+    [SerializeField] private TileType defaultTile;
     private TileType current;
 
     public enum TileType

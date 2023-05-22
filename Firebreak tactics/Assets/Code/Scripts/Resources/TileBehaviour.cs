@@ -5,12 +5,10 @@ using UnityEngine;
 public class TileBehaviour : MonoBehaviour
 {
     // code inheritance
-    [SerializeField]
-    private MaterialChanger materialChanger; // handles changing materials 
+    [SerializeField] private MaterialChanger materialChanger; // handles changing materials 
 
     // tile states
-    [SerializeField]
-    private TileType tile; // what type of tile is it
+    [SerializeField] private TileType tile; // what type of tile is it
     private TileType defaultTile; // what type of tile was it originally 
     private bool onFire = false; // is the tile burning
     private bool onEmber = false; // is the tile embering 
