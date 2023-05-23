@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class FireManager : MonoBehaviour
 {
+    [SerializeField] TileManager tileManager;
     private bool hasControl = false; // player can interact with the game  
 
     void Awake()
@@ -18,15 +19,21 @@ public class FireManager : MonoBehaviour
 
     private void GameStateChanged(GameManager.GameState _state)
     {
-        hasControl = (_state == GameManager.GameState.EnemyTurn);
-        if (hasControl){
-            TakeTurn();
+        if (_state == GameManager.GameState.EnemyTurn){
+        	if (tileManager.GetFireTiles().Count > 0){
+	            tileManager.SpreadFire();
+	            GameManager.Instance.EndTurn();
+        	}
+        	else{
+        		GameManager.Instance.UpdateGameState(GameManager.GameState.Victory); // victory by 0 fire tiles
+        	}
+
+        }
+
+        if (_state == GameManager.GameState.PreTurn)
+        {
+        	// tell TileManager to change decay of every fire tile  
+        	// organize ember tile actions 
         }
     }
-
-    private void TakeTurn(){
-        
-    }
-
-    
 }

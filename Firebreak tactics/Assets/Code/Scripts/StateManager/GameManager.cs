@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour
             case GameState.EnemyTurn:
                 break;
             case GameState.PreTurn:
+                PreTurn();
                 break;
             case GameState.Victory:
                 break;
@@ -51,5 +52,18 @@ public class GameManager : MonoBehaviour
         PreTurn,
         Victory,
         Lose
+    }
+
+    public void EndTurn(){
+        if (State == GameState.EnemyTurn)
+        {
+            State = GameState.EnemyTurn; // change this to player's turn or pre turn later
+            OnGameStateChanged?.Invoke(State); // FireManager is listening for active
+        }
+    }
+
+    public void PreTurn(){
+        OnGameStateChanged?.Invoke(State); // FireManager is listening for active 
+        // change wind direction 
     }
 }

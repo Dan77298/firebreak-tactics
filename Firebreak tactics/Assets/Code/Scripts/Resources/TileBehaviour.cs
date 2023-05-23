@@ -12,6 +12,7 @@ public class TileBehaviour : MonoBehaviour
     private TileType defaultTile; // what type of tile was it originally 
     private bool onFire = false; // is the tile burning
     private bool onEmber = false; // is the tile embering 
+    private bool burned = false; // is the tile fully depleted naturally 
     private bool hasEmbered = false; // has the tile used its ember state 
 
     private Material tileMaterial; // the tile's default material 
@@ -34,7 +35,8 @@ public class TileBehaviour : MonoBehaviour
         Dirt,
         Fire,
         Water,
-        Ember
+        Ember,
+        Burned
     }
 
     private void Awake(){
@@ -123,9 +125,22 @@ public class TileBehaviour : MonoBehaviour
                 onEmber = true;
                 hasEmbered = true;
                 break;
+            case TileType.Burned:
+                burned = true;
+                decay = 0;
+                vegetation = 0;
+                break;
             default:
                 break;
         }
+    }
+
+    public List<GameObject> GetNeighbouringTiles(){
+        List<GameObject> neighbouringTiles = new List<GameObject>();
+
+        // add logic here 
+        
+        return neighbouringTiles;
     }
 
     public bool GetOnFire(){
@@ -169,6 +184,16 @@ public class TileBehaviour : MonoBehaviour
     public TileType GetTileType(){
         // returns the currentTile
         return this.tile;
+    }
+
+    public void DecayTile(){
+        if (decay > 0){
+           decay--; 
+        }else{
+            burned = true;
+            ChangeTileState(TileType.Burned);
+            MaterialChanger.TileType materialType = (MaterialChanger.TileType)tile;
+        }  
     }
 
 
