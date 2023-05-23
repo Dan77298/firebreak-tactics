@@ -4,10 +4,8 @@ using UnityEngine;
 
 public class MaterialChanger : MonoBehaviour
 {
-    [SerializeField]
-    private Renderer objectRenderer;
-    [SerializeField]
-    private TileType defaultTile;
+    [SerializeField] private Renderer objectRenderer;
+    [SerializeField] private TileType defaultTile;
     private TileType current;
 
     public enum TileType
@@ -18,7 +16,8 @@ public class MaterialChanger : MonoBehaviour
         Dirt,
         Fire,
         Water,
-        Ember
+        Ember,
+        Burned
     }
 
     private void Awake()
@@ -51,6 +50,9 @@ public class MaterialChanger : MonoBehaviour
                 break; 
             case TileType.Ember:
                 objectRenderer.material = GetMaterialFromName("Ember");
+                break; 
+            case TileType.Burned:
+                objectRenderer.material = GetMaterialFromName("Burned");
                 break; 
             // Add cases for other materials here
 
