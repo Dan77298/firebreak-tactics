@@ -135,13 +135,23 @@ public class TileBehaviour : MonoBehaviour
         }
     }
 
-    public List<GameObject> GetNeighbouringTiles(){
+    public List<GameObject> GetNeighbouringTiles()
+    {
         List<GameObject> neighbouringTiles = new List<GameObject>();
 
-        // add logic here 
+        float maxDistance = 0.8659f;
+        Collider[] colliders = Physics.OverlapSphere(transform.position, maxDistance);
+        foreach (Collider collider in colliders)
+        {
+            if (collider.gameObject != gameObject)
+            {
+                neighbouringTiles.Add(collider.gameObject);
+            }
+        }
         
         return neighbouringTiles;
     }
+
 
     public bool GetOnFire(){
         return this.onFire;
@@ -154,6 +164,7 @@ public class TileBehaviour : MonoBehaviour
     public void SetOnFire(){
         if (CanOnFire()){
             // can tile be ignited
+            tile = TileType.Fire;
             ChangeTileState(TileType.Fire);
             changeMaterial();
         }
@@ -162,6 +173,7 @@ public class TileBehaviour : MonoBehaviour
     public void SetOnEmber(){
         if (CanOnEmber()){
             // can tile be embered
+            tile = TileType.Ember;
             ChangeTileState(TileType.Ember);
             changeMaterial();
         }
@@ -186,19 +198,29 @@ public class TileBehaviour : MonoBehaviour
         return this.tile;
     }
 
+    public int getDecay(){
+        return decay;
+    }
     public void DecayTile(){
         if (decay > 0){
            decay--; 
         }else{
             burned = true;
+            tile = TileType.Burned;
             ChangeTileState(TileType.Burned);
             MaterialChanger.TileType materialType = (MaterialChanger.TileType)tile;
         }  
     }
 
+    public void setToDirt(){
+        tile = TileType.Dirt;
+        ChangeTileState(tile);
+        changeMaterial();
+    }
+
 
     public bool CanOnFire(){
-        if (!onFire && decay > 0 && vegetation > 0){
+        if (!onFire && decay > 0){
         // if the tile isn't on fire, had fuel to begin with, and has fuel remaining 
             return true;
         }
@@ -207,14 +229,15 @@ public class TileBehaviour : MonoBehaviour
 
     public bool CanOnEmber()
     {
-        if (!onEmber && !onFire && hasEmbered && decay > 0 && vegetation > 0){
+        if (!onEmber && !onFire && hasEmbered && decay > 0){
         // if the tile isn't on fire, had fuel to begin with, hasn't been embered already, and has fuel remaining
             return true;
         }
         return false;
     }
 
-    private void changeMaterial(){
+    private void changeMaterial()
+    {
         MaterialChanger.TileType materialType = (MaterialChanger.TileType)tile;
         materialChanger.SetTile(materialType);
     }

@@ -98,6 +98,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   materialChanger: {fileID: -3948020951999454232}
   tile: 0
+--- !u!64 &7327854337734709789
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3326684558713173926}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -4575734979276873811, guid: 800e03d16de782e498e80688f443b10a, type: 3}
 --- !u!23 &3830942101303957107 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 9188908109019076722, guid: 6823baaa797ab7549ba233fe1f43ec8b, type: 3}
