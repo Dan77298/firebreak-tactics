@@ -29,7 +29,7 @@ public class TileManager : MonoBehaviour{
         }
     }
 
-    private void GetTileObjects(){
+    public void GetTileObjects(){
         tiles.Clear();
         fireTiles.Clear();
 
@@ -45,8 +45,10 @@ public class TileManager : MonoBehaviour{
         }
     }
 
-    public void SetNextFireTiles(){
-        Debug.Log("SetNextFireTiles called");
+    public void SetNextFireTiles(){ 
+        Debug.Log("tiles: " + tiles.Count);
+        Debug.Log("fireTiles: " + fireTiles.Count);
+        Debug.Log("nextFireTiles: " + nextFireTiles.Count);
         nextFireTiles.Clear();
         foreach (GameObject tile in fireTiles){
             TileBehaviour tileBehaviour = tile.GetComponent<TileBehaviour>();
@@ -54,14 +56,13 @@ public class TileManager : MonoBehaviour{
             foreach (GameObject _tile in neighbouringTiles){
                 TileBehaviour tilescript = _tile.GetComponent<TileBehaviour>();
                 if (tilescript != null && tilescript.CanOnFire()){
-                    nextFireTiles.Add(_tile);
+                    nextFireTiles.Add(_tile);                  
                 }
             }
         }
     }
 
     public void DecayFire(){
-        Debug.Log("DecayFire called");
         foreach (GameObject tile in fireTiles)
         {
            TileBehaviour tileBehaviour = tile.GetComponent<TileBehaviour>(); 
@@ -80,16 +81,24 @@ public class TileManager : MonoBehaviour{
         return fireTiles;
     }
 
-    public void SpreadFire(){
-        int spreadRate = 1;
+    public List<GameObject> GetNextFireTiles(){
+        return nextFireTiles;
+    }
 
-        for (int i=0; i < spreadRate; i++){
+    public int GetSpreadRate(){
+        return ((fireTiles.Count)/ 4 ) + 1;
+    }
+
+    public void SpreadFire(){
+        
+        for (int i=0; i < GetSpreadRate(); i++){
             int randomNumber = Random.Range(0, nextFireTiles.Count);
             GameObject selected = nextFireTiles[randomNumber];
             TileBehaviour tileBehaviour = selected.GetComponent<TileBehaviour>();
             if (tileBehaviour != null)
             {
                 tileBehaviour.SetOnFire();
+                fireTiles.Add(selected);
             }
         }  
     }

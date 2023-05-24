@@ -165,6 +165,7 @@ public class TileBehaviour : MonoBehaviour
         if (CanOnFire()){
             // can tile be ignited
             tile = TileType.Fire;
+            gameObject.name = "Fire";
             ChangeTileState(TileType.Fire);
             changeMaterial();
         }
@@ -174,6 +175,7 @@ public class TileBehaviour : MonoBehaviour
         if (CanOnEmber()){
             // can tile be embered
             tile = TileType.Ember;
+            gameObject.name = "Ember";
             ChangeTileState(TileType.Ember);
             changeMaterial();
         }
@@ -182,7 +184,7 @@ public class TileBehaviour : MonoBehaviour
     public void Extinguish(){
         // extinguish a burning tile
         if (GetOnFire() || GetOnEmber()){
-            // if the tile is on fire or embering
+            // rename the tile from the enum variable
             ChangeTileState(GetDefaultTile());
             changeMaterial();
         }
@@ -198,18 +200,24 @@ public class TileBehaviour : MonoBehaviour
         return this.tile;
     }
 
+    public int GetVegetation(){
+        return this.vegetation;
+    }
+
     public int getDecay(){
-        return decay;
+        return this.decay;
     }
     public void DecayTile(){
         if (decay > 0){
            decay--; 
         }else{
+            Debug.Log("TILE IS CONSUMED");
             burned = true;
+            gameObject.name = "Burned";
             tile = TileType.Burned;
-            ChangeTileState(TileType.Burned);
-            MaterialChanger.TileType materialType = (MaterialChanger.TileType)tile;
-        }  
+            ChangeTileState(tile);
+            changeMaterial();
+        } 
     }
 
     public void setToDirt(){

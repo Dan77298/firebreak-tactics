@@ -18,14 +18,12 @@ public class PlayerTurnUI : MonoBehaviour
     private void GameStateChanged(GameManager.GameState _state){
         PlayerTurn = (_state == GameManager.GameState.PlayerTurn);
         if (PlayerTurn){
-        	Debug.Log("PlayerTurnUI listening");
         }
     }
 
     public void EndTurn(){
     	if (PlayerTurn)
     	{
-    		Debug.Log("Ending state: PlayerTurn");
     		GameManager.Instance.UpdateGameState(GameManager.GameState.EnemyTurn);
     	}
     }
