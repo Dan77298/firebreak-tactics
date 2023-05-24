@@ -15,7 +15,6 @@ public class PlayerController : MonoBehaviour{
 
     private void GameStateChanged(GameManager.GameState _state){
         if (_state == GameManager.GameState.PlayerTurn){
-            //GameManager.Instance.UpdateGameState(GameManager.GameState.EnemyTurn);
         }
     }
 }

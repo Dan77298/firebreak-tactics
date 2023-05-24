@@ -5,10 +5,13 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] private GameObject LoseUI;
+    [SerializeField] private GameObject PlayerUI;
     public static GameManager Instance;
     public GameState State;
 
     public static event Action<GameState> OnGameStateChanged;
+
 
     void Awake()
     {
@@ -39,6 +42,7 @@ public class GameManager : MonoBehaviour
             case GameState.Victory:
                 break;
             case GameState.Lose:
+                Lose();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(_state), _state, null);
@@ -59,5 +63,10 @@ public class GameManager : MonoBehaviour
 
     public void PreTurn(){
         // change wind direction 
+    }
+
+    private void Lose(){
+        LoseUI.SetActive(true);
+        PlayerUI.SetActive(false);
     }
 }
