@@ -23,14 +23,17 @@ public class GameManager : MonoBehaviour
     public void UpdateGameState(GameState _state)
     {
         State = _state;
+        Debug.Log("State change: " + _state);
 
         switch (_state)
         {
-            case GameState.PlayerTurn:
+            case GameState.ProduceTerrain: // TileManager listens
                 break;
-            case GameState.EnemyTurn:
+            case GameState.PlayerTurn: // PlayerController listens
                 break;
-            case GameState.PreTurn:
+            case GameState.EnemyTurn: // FireManager listens
+                break;
+            case GameState.PreTurn: // FireManager listens
                 PreTurn();
                 break;
             case GameState.Victory:
@@ -54,16 +57,7 @@ public class GameManager : MonoBehaviour
         Lose
     }
 
-    public void EndTurn(){
-        if (State == GameState.EnemyTurn)
-        {
-            State = GameState.EnemyTurn; // change this to player's turn or pre turn later
-            OnGameStateChanged?.Invoke(State); // FireManager is listening for active
-        }
-    }
-
     public void PreTurn(){
-        OnGameStateChanged?.Invoke(State); // FireManager is listening for active 
         // change wind direction 
     }
 }

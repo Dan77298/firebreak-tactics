@@ -103,3 +103,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   materialChanger: {fileID: 2585899525103063216}
   tile: 3
+--- !u!64 &-6000212828243781656
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8264256021857354654}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -4575734979276873811, guid: 800e03d16de782e498e80688f443b10a, type: 3}

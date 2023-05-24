@@ -20,9 +20,10 @@ public class FireManager : MonoBehaviour
     private void GameStateChanged(GameManager.GameState _state)
     {
         if (_state == GameManager.GameState.EnemyTurn){
+        	Debug.Log("FireManager listening");
         	if (tileManager.GetFireTiles().Count > 0){
 	            tileManager.SpreadFire();
-	            GameManager.Instance.EndTurn();
+	            GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn);
         	}
         	else{
         		GameManager.Instance.UpdateGameState(GameManager.GameState.Victory); // victory by 0 fire tiles
@@ -33,7 +34,11 @@ public class FireManager : MonoBehaviour
         if (_state == GameManager.GameState.PreTurn)
         {
         	// tell TileManager to change decay of every fire tile  
+        	tileManager.DecayFire();
+        	tileManager.SetNextFireTiles();
         	// organize ember tile actions 
+        	Debug.Log("Ending state: PreTurn");
+        	GameManager.Instance.UpdateGameState(GameManager.GameState.PlayerTurn);
         }
     }
 }
