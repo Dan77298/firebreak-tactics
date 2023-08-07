@@ -16,6 +16,10 @@ PrefabInstance:
       value: 4
       objectReference: {fileID: 0}
     - target: {fileID: -3895381629146457056, guid: 458b117513551bb4497dfba2719c7aac, type: 3}
+      propertyPath: actionPoints
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -3895381629146457056, guid: 458b117513551bb4497dfba2719c7aac, type: 3}
       propertyPath: canExtinguish
       value: 1
       objectReference: {fileID: 0}
