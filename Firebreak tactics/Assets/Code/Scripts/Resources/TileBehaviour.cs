@@ -7,6 +7,9 @@ public class TileBehaviour : MonoBehaviour
     // code inheritance
     [SerializeField] private MaterialChanger materialChanger; // handles changing materials 
 
+    public Grid grid;
+    public Vector3Int cellPos;
+
     // tile states
     [SerializeField] private TileType tile; // what type of tile is it
     private TileType defaultTile; // what type of tile was it originally 
@@ -42,6 +45,11 @@ public class TileBehaviour : MonoBehaviour
     private void Awake(){
         ChangeTileState(tile); 
         SetDefaultState(tile);
+
+        grid = transform.parent.GetComponent<Grid>();
+
+        cellPos = grid.WorldToCell(new Vector3(transform.position.x, 0, transform.position.z));
+
     }
 
     private void SetDefaultState(TileType _tile){
