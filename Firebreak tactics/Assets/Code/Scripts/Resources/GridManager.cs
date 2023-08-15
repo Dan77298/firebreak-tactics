@@ -4,12 +4,11 @@ using UnityEngine;
 
 public class GridManager : MonoBehaviour
 {
-    public Grid grid;
+    [SerializeField] private Grid grid;
 
     public List<List<GameObject>> gridXZ = new List<List<GameObject>>();
 
-
-    void Awake()
+    void Start()
     {
         grid = GetComponent<Grid>();
 
@@ -71,5 +70,4 @@ public class GridManager : MonoBehaviour
             }
          */
     }
-
 }
