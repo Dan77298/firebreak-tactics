@@ -5,9 +5,11 @@ using TMPro;
 
 public class FireManager : MonoBehaviour
 {
+    [SerializeField] private WindDirection wind = WindDirection.S; // south default to establish game
     [SerializeField] private TileManager tileManager;
     [SerializeField] private TMP_Text Heat;
     [SerializeField] private TMP_Text Fire;
+    [SerializeField] private TMP_Text UIN,UIE,UIS,UIW;
 
     private void Awake()
     {
@@ -17,6 +19,35 @@ public class FireManager : MonoBehaviour
     private void OnDestroy()
     {
         GameManager.OnGameStateChanged -= GameStateChanged;
+    }
+
+    public enum WindDirection{
+        N, E, S, W
+    }
+
+    public void ChangeWindDirection()
+    {
+        if (UnityEngine.Random.Range(0, 4) == 0)
+        {
+            List<WindDirection> choices = new List<WindDirection>{
+                WindDirection.N, WindDirection.E, WindDirection.S, WindDirection.W
+            };
+            choices.Remove(wind);
+
+            int newDirection = UnityEngine.Random.Range(0, choices.Count);
+            wind = choices[newDirection];
+        }
+         // colour changer 
+        switch (wind){
+            case WindDirection.N:
+                break;
+            case WindDirection.W:
+                break;
+            case WindDirection.E:
+                break;
+            default: // S
+                break;
+        }
     }
 
     private void GameStateChanged(GameManager.GameState _state)
@@ -49,9 +80,10 @@ public class FireManager : MonoBehaviour
 
         if (_state == GameManager.GameState.PreTurn)
         {
+            ChangeWindDirection();
             tileManager.DecayFire();
             Heat.text = "HEAT " + tileManager.GetSpreadRate();
-            Fire.text = "FIRE " + tileManager.GetFireTiles().Count; // Access fireTiles here
+            Fire.text = "FIRE " + tileManager.GetFireTiles().Count;
             GameManager.Instance.UpdateGameState(GameManager.GameState.PlayerTurn);
         }
     }

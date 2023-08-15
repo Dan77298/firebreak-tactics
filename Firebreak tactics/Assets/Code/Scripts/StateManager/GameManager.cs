@@ -12,7 +12,6 @@ public class GameManager : MonoBehaviour
 
     public static event Action<GameState> OnGameStateChanged;
 
-
     void Awake()
     {
         Instance = this;
@@ -37,7 +36,6 @@ public class GameManager : MonoBehaviour
             case GameState.EnemyTurn: // FireManager listens
                 break;
             case GameState.PreTurn: // FireManager listens
-                PreTurn();
                 break;
             case GameState.Victory:
                 break;
@@ -61,11 +59,8 @@ public class GameManager : MonoBehaviour
         Lose
     }
 
-    public void PreTurn(){
-        // change wind direction 
-    }
-
-    private void Lose(){
+    private void Lose()
+    {
         LoseUI.SetActive(true);
         PlayerUI.SetActive(false);
     }

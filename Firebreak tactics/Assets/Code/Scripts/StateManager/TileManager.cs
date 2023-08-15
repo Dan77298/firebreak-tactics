@@ -83,20 +83,20 @@ public class TileManager : MonoBehaviour
     }
 
     public void SpreadFire(){
-        List<GameObject> tilesToIgnite = new List<GameObject>();
+        List<GameObject> igniteList = new List<GameObject>(); // prevents ignite piggybacking 
         int spreadRate = GetSpreadRate();
 
         if (fireTiles.Count > 0)
         {
             for (int i = 0; i < spreadRate; i++)
             {
-                GameObject fireTile = SelectFireTile(); // Corrected method name
+                GameObject fireTile = SelectFireTile();
                 if (fireTile != null)
                 {
-                    GameObject selected = selectIgniteTile(fireTile, tilesToIgnite); // Pass the list to exclude duplicates
+                    GameObject selected = selectIgniteTile(fireTile, igniteList); // prevents duplicate entries
                     if (selected != null)
                     {
-                        tilesToIgnite.Add(selected);
+                        igniteList.Add(selected);
                     }
                     else
                     {
@@ -111,34 +111,33 @@ public class TileManager : MonoBehaviour
                 }
             }
 
-            foreach (GameObject tileToIgnite in tilesToIgnite)
+            foreach (GameObject iTile in igniteList)
             {
-                TileBehaviour script = tileToIgnite.GetComponent<TileBehaviour>();
-                Debug.Log("Tile " + tileToIgnite.name + " set on fire.");
+                TileBehaviour script = iTile.GetComponent<TileBehaviour>();
+                Debug.Log("Tile " + iTile.name + " set on fire.");
                 script.SetOnFire();
-                fireTiles.Add(tileToIgnite);
+                fireTiles.Add(iTile);
             }
         }
     }
 
-    private GameObject SelectFireTile()
-        // currently random
-    {
+    private GameObject SelectFireTile(){
+        // currently random, add wind direction factor
         int attempts = 0;
 
         while (attempts < fireTiles.Count)
         {
             int randomIndex = Random.Range(0, fireTiles.Count);
-            GameObject randomFireTile = fireTiles[randomIndex];
+            GameObject fireTile = fireTiles[randomIndex];
 
-            if (HasIgnitableNeighbours(randomFireTile))
+            if (hasIgnitableNeighbours(fireTile))
             {
                 Debug.Log("Selected tile has ignitable neighbours");
-                return randomFireTile;
+                return fireTile;
             }
             else
             {
-                Debug.Log("Selected tile " + randomFireTile.name + " does not have ignitable neighbors.");
+                Debug.Log("Selected tile " + fireTile.name + " does not have ignitable neighbors.");
             }
 
             attempts++;
@@ -148,18 +147,18 @@ public class TileManager : MonoBehaviour
         return null;
     }
 
-    private GameObject selectIgniteTile(GameObject fireTile, List<GameObject> excludeTiles)
-    {
-        TileBehaviour tileBehaviour = fireTile.GetComponent<TileBehaviour>();
-        List<GameObject> neighbouringTiles = tileBehaviour.GetNeighbouringTiles();
-        List<GameObject> ignitableNeighbours = new List<GameObject>();
+    private GameObject selectIgniteTile(GameObject fireTile, List<GameObject> excludeTiles){
+        // currently random, add wind direction factor
+        TileBehaviour script = fireTile.GetComponent<TileBehaviour>();
+        List<GameObject> neighbours = script.GetNeighbouringTiles();
+        List<GameObject> ignitableNeighbours = new List<GameObject>(); // neighbour candidates list
 
-        foreach (GameObject neighbouringTile in neighbouringTiles)
+        foreach (GameObject nTile in neighbours)
         {
-            TileBehaviour neighbourTilescript = neighbouringTile.GetComponent<TileBehaviour>();
-            if (neighbourTilescript != null && neighbourTilescript.CanOnFire() && !excludeTiles.Contains(neighbouringTile))
+            TileBehaviour nScript = nTile.GetComponent<TileBehaviour>();
+            if (nScript.CanOnFire() && !excludeTiles.Contains(nTile))
             {
-                ignitableNeighbours.Add(neighbouringTile);
+                ignitableNeighbours.Add(nTile);
             }
         }
 
@@ -172,7 +171,7 @@ public class TileManager : MonoBehaviour
         return null;
     }
 
-    private bool HasIgnitableNeighbours(GameObject tile)
+    private bool hasIgnitableNeighbours(GameObject tile)
     {
         TileBehaviour script = tile.GetComponent<TileBehaviour>();
         List<GameObject> nTiles = script.GetNeighbouringTiles();
