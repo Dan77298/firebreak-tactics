@@ -8,6 +8,7 @@ public class FireManager : MonoBehaviour
     [SerializeField] private WindDirection wind = WindDirection.S; // south default to establish game
     [SerializeField] private TileManager tileManager;
     [SerializeField] private TMP_Text Heat;
+    [SerializeField] private TMP_Text Turn,Turn2;
     [SerializeField] private TMP_Text Fire;
     [SerializeField] private TMP_Text UIN,UIE,UIS,UIW;
     private int globaltime, time, Ntime = 0;
@@ -109,7 +110,7 @@ public class FireManager : MonoBehaviour
             // upon player ending turn, check for win/loss conditions
             Debug.Log("FireManager listening");
 
-            if (tileManager.hasIgnitableTiles())
+            if (tileManager.hasTurnsRemaining())
             {
                 if (tileManager.GetFireTiles().Count > 0) // game goes on
                 {
@@ -121,9 +122,9 @@ public class FireManager : MonoBehaviour
                     GameManager.Instance.UpdateGameState(GameManager.GameState.Victory);
                 }
             }
-            else // lose by all tiles on fire 
+            else // the fire has no more options  
             {
-                GameManager.Instance.UpdateGameState(GameManager.GameState.Lose);
+                GameManager.Instance.UpdateGameState(GameManager.GameState.Victory);
             }
         }
 
@@ -131,6 +132,8 @@ public class FireManager : MonoBehaviour
         {
             ChangeWindDirection();
             tileManager.DecayFire();
+            Turn.text = "TURN " + globaltime;
+            Turn2.text = "TURN " + globaltime;
             Heat.text = "HEAT " + tileManager.GetSpreadRate();
             Fire.text = "FIRE " + tileManager.GetFireTiles().Count;
             GameManager.Instance.UpdateGameState(GameManager.GameState.PlayerTurn);

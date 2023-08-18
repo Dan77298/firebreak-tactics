@@ -6,6 +6,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private GameObject LoseUI;
+    [SerializeField] private GameObject VictoryUI;
     [SerializeField] private GameObject PlayerUI;
     public static GameManager Instance;
     public GameState State;
@@ -38,6 +39,7 @@ public class GameManager : MonoBehaviour
             case GameState.PreTurn: // FireManager listens
                 break;
             case GameState.Victory:
+                Victory();
                 break;
             case GameState.Lose:
                 Lose();
@@ -57,6 +59,12 @@ public class GameManager : MonoBehaviour
         PreTurn,
         Victory,
         Lose
+    }
+
+    private void Victory()
+    {
+        VictoryUI.SetActive(true);
+        PlayerUI.SetActive(false);
     }
 
     private void Lose()

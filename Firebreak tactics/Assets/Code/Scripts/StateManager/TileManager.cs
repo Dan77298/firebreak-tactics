@@ -151,6 +151,23 @@ public class TileManager : MonoBehaviour
         }
     }
 
+    public bool hasTurnsRemaining(){
+        foreach (GameObject tiles in fireTiles){
+        // for all fire tiles
+            TileBehaviour script = tiles.GetComponent<TileBehaviour>();
+            List<GameObject> neighbours = gridManager.getNeighbours(script.getCellPos());
+            foreach (GameObject nTile in neighbours){
+            // for all neighbours to fire tiles
+                TileBehaviour nScript = nTile.GetComponent<TileBehaviour>();
+                if (nScript.CanOnFire())
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private int getFireAdjacencies(List<GameObject> list){
     // returns the number of fire adjacencies in a list of neighbour tiles
         int tally = 0;
