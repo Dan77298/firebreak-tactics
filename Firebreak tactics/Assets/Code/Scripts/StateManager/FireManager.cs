@@ -10,6 +10,7 @@ public class FireManager : MonoBehaviour
     [SerializeField] private TMP_Text Heat;
     [SerializeField] private TMP_Text Fire;
     [SerializeField] private TMP_Text UIN,UIE,UIS,UIW;
+    private int globaltime, time, Ntime = 0;
 
     private void Awake()
     {
@@ -27,17 +28,57 @@ public class FireManager : MonoBehaviour
 
     public void ChangeWindDirection()
     {
-        if (UnityEngine.Random.Range(0, 8) == 0)
-        {
-            List<WindDirection> choices = new List<WindDirection>{
-                WindDirection.N, WindDirection.E, WindDirection.S, WindDirection.W
-            };
-            choices.Remove(wind);
+        List<GameObject> spreadTiles = tileManager.getDownBreezeTiles((TileManager.WindDirection)wind);
+        List<WindDirection> choices = choices = new List<WindDirection>{
+            WindDirection.N, WindDirection.E, WindDirection.S, WindDirection.W};
 
-            int newDirection = UnityEngine.Random.Range(0, choices.Count);
-            wind = choices[newDirection];
+        if (globaltime < 7 || Ntime < 5){
+        // wind direction can't change to north until turn 7 or if it's been 5 turns since north
+            choices.Remove(WindDirection.N);
         }
 
+        if (spreadTiles.Count <= tileManager.GetSpreadRate() || spreadTiles.Count < 3){
+        // if the current direction will result in filling or underwhelming enemy turn, force a swap
+        // this will prevent map being 100% full but prevent the fire cornering itself 
+            choices.Remove(wind);
+            int newDirection = UnityEngine.Random.Range(0, choices.Count);
+            wind = choices[newDirection];
+            time = 0;
+        }
+
+        // add a biase for the direction to change with respect to the user and objectives
+
+        if (wind == WindDirection.N && time >= 1){
+            // only let it stay north for 1 turn and put north on cooldown
+            choices.Remove(wind);
+            int newDirection = UnityEngine.Random.Range(0, choices.Count);
+            wind = choices[newDirection];
+            time ++;
+            Ntime = 0; // north cooldown
+        }
+        else{
+            if (wind != WindDirection.S && time >= 2){
+            // change at least every 2 turns if it isn't southernly 
+                choices.Remove(wind);
+                int newDirection = UnityEngine.Random.Range(0, choices.Count);
+                wind = choices[newDirection];
+                time ++;
+            }
+            else{
+            // sometimes change sooner 1/3 of the time
+                if (UnityEngine.Random.Range(0, 3) == 0){
+                    int newDirection = UnityEngine.Random.Range(0, choices.Count);
+                    wind = choices[newDirection];
+                    time = 0;
+                }           
+            }  
+        }   
+        Ntime++;
+        globaltime++;
+        colourCompass();
+    }
+
+    private void colourCompass(){
         UIN.color = new Color32(171,171,171,255);
         UIE.color = new Color32(171,171,171,255);
         UIS.color = new Color32(171,171,171,255);
