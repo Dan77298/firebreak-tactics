@@ -37521,8 +37521,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12d333270080d2b449210fc95cf1eadf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boardGrid: {fileID: 128932449}
-  gridManager: {fileID: 0}
+  gridTiles: {fileID: 128932449}
+  gridManager: {fileID: 1519993931}
 --- !u!114 &1519993929
 MonoBehaviour:
   m_ObjectHideFlags: 0

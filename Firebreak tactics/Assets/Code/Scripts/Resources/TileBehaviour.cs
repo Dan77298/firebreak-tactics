@@ -147,24 +147,6 @@ public class TileBehaviour : MonoBehaviour
         return cellPos;
     }
 
-    public List<GameObject> GetNeighbouringTiles()
-    {
-        List<GameObject> neighbouringTiles = new List<GameObject>();
-
-        float maxDistance = 0.8659f;
-        Collider[] colliders = Physics.OverlapSphere(transform.position, maxDistance);
-        foreach (Collider collider in colliders)
-        {
-            if (collider.gameObject != gameObject)
-            {
-                neighbouringTiles.Add(collider.gameObject);
-            }
-        }
-        
-        return neighbouringTiles;
-    }
-
-
     public bool GetOnFire(){
         return this.onFire;
     }
@@ -219,7 +201,7 @@ public class TileBehaviour : MonoBehaviour
     public int getDecay(){
         return this.decay;
     }
-    public void DecayTile(){
+    public void decayTile(){
         if (decay > 0){
            decay--; 
         }else{

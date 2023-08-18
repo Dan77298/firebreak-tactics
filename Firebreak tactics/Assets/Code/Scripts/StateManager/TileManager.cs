@@ -4,70 +4,63 @@ using UnityEngine;
 
 public class TileManager : MonoBehaviour
 {
-    [SerializeField] public Grid boardGrid;
+    [SerializeField] private Grid gridTiles;
     [SerializeField] private GridManager gridManager; 
 
-    private List<GameObject> fireTiles;
-    private List<GameObject> nextFireTiles;
-    public List<List<GameObject>> gridXZ = new List<List<GameObject>>();
+    private List<List<GameObject>> gridXZ;
+    private List<GameObject> fireTiles = new List<GameObject>();
+    
     private bool hasIgnitableTile = true;
 
-    public enum WindDirection
-    {
+    public enum WindDirection{
         N, E, S, W
     }
 
-    void Awake()
-    {
-        fireTiles = new List<GameObject>();
-        nextFireTiles = new List<GameObject>();
+    void Awake(){ 
         GameManager.OnGameStateChanged += GameStateChanged;
     }
 
-    void OnDestroy()
-    {
+    void Start(){
+        gridXZ = gridManager.getGridXZ();
+    }
+
+    void OnDestroy(){
+    // remove state listener when game is finished
         GameManager.OnGameStateChanged -= GameStateChanged;
     }
 
-    private void GameStateChanged(GameManager.GameState _state)
-    {
+    private void GameStateChanged(GameManager.GameState _state){
+    // all actions before the game gives the player their first turn
         if (_state == GameManager.GameState.ProduceTerrain)
         {
-            SetTiles();
+            updateFireTiles();
             GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn);
         }
     }
 
-    public void SetTiles()
-    {
-        List<Transform> tiles = new List<Transform>();
-        int gridCols = 0;
-        int gridRows = 0;
-
-        foreach (Transform child in boardGrid.transform)
-        {
+    public void updateFireTiles(){
+    // write a list of all tiles named "Fire"
+        foreach (Transform child in gridTiles.transform){
             if (child.name == "Fire") fireTiles.Add(child.gameObject);
         }
     }
     
-    public void DecayFire()
-    {
+    public void DecayFire(){
+        Debug.Log("DecayFire");
         List<GameObject> depleted = new List<GameObject>();
 
-        foreach (GameObject tile in fireTiles)
-        {
+        foreach (GameObject tile in fireTiles){
+        // queue all depleted fires for removal
             TileBehaviour script = tile.GetComponent<TileBehaviour>();
-            script.DecayTile();
-            if (!script.GetOnFire())
-            {
+            script.decayTile();
+            if (tile.name != "Fire"){
                 depleted.Add(tile);
             }
         }
 
-        foreach (GameObject _tile in depleted)
-        {
+        foreach (GameObject tile in depleted){
             Debug.Log("fire removed from list. Remaining: " + fireTiles.Count);
-            fireTiles.Remove(_tile);
+            fireTiles.Remove(tile);
         }
     }
 
@@ -75,12 +68,7 @@ public class TileManager : MonoBehaviour
         return fireTiles;
     }
 
-    public List<GameObject> GetNextFireTiles(){
-        return nextFireTiles;
-    }
-
-    public int GetSpreadRate()
-    {
+    public int GetSpreadRate(){
         return Mathf.FloorToInt(2 + (fireTiles.Count / 7));
     }
 
@@ -96,10 +84,10 @@ public class TileManager : MonoBehaviour
         {
             for (int i = 0; i < spreadRate; i++)
             {
-                GameObject fireTile = SelectFireTile();
+                GameObject fireTile = SelectFireTile(wind);
                 if (fireTile != null)
                 {
-                    GameObject selected = selectIgniteTile(fireTile, igniteList); // prevents duplicate entries
+                    GameObject selected = selectIgniteTile(fireTile, igniteList, wind); // prevents duplicate entries
                     if (selected != null)
                     {
                         igniteList.Add(selected);
@@ -117,17 +105,17 @@ public class TileManager : MonoBehaviour
                 }
             }
 
-            foreach (GameObject iTile in igniteList)
+            foreach (GameObject newFire in igniteList)
             {
-                TileBehaviour script = iTile.GetComponent<TileBehaviour>();
-                Debug.Log("Tile " + iTile.name + " set on fire.");
+                TileBehaviour script = newFire.GetComponent<TileBehaviour>();
+                Debug.Log("Tile " + newFire.name + " set on fire.");
                 script.SetOnFire();
-                fireTiles.Add(iTile);
+                fireTiles.Add(newFire);
             }
         }
     }
 
-    private GameObject SelectFireTile(){
+    private GameObject SelectFireTile(WindDirection wind){
         // currently random, add wind direction factor
         int attempts = 0;
 
@@ -136,7 +124,7 @@ public class TileManager : MonoBehaviour
             int randomIndex = Random.Range(0, fireTiles.Count);
             GameObject fireTile = fireTiles[randomIndex];
 
-            if (hasIgnitableNeighbours(fireTile))
+            if (hasIgnitableNeighbours(fireTile, wind))
             {
                 Debug.Log("Selected tile has ignitable neighbours");
                 return fireTile;
@@ -153,26 +141,22 @@ public class TileManager : MonoBehaviour
         return null;
     }
 
-    private GameObject selectIgniteTile(GameObject fireTile, List<GameObject> excludeTiles){
-        // currently random, add wind direction factor
+    private GameObject selectIgniteTile(GameObject fireTile, List<GameObject> excludeTiles, WindDirection wind){
+        // tile selected based on wind
         TileBehaviour script = fireTile.GetComponent<TileBehaviour>();
-        List<GameObject> neighbours = script.GetNeighbouringTiles();
-        //List<GameObject> neighbours = GetNeighbouringTiles(script.getCellPos());
-        //Debug.Log("selectIgniteTile " + script.getCellPos() + " |  " + neighbours.Count);
+        List<GameObject> neighbours = gridManager.getDirectionalNeighbours(script.getCellPos(),(GridManager.WindDirection)wind);
         List<GameObject> ignitableNeighbours = new List<GameObject>(); // neighbour candidates list
+
         if (neighbours != null){
-            foreach (GameObject nTile in neighbours)
-            {
+            foreach (GameObject nTile in neighbours){
+                // make a candidate list of all possible neighbours to spread to
                 TileBehaviour nScript = nTile.GetComponent<TileBehaviour>();
-                Debug.Log(nScript.getCellPos());
-                if (nScript.CanOnFire() && !excludeTiles.Contains(nTile))
-                {
+                if (nScript.CanOnFire() && !excludeTiles.Contains(nTile)){
                     ignitableNeighbours.Add(nTile);
                 }
             }
-
-            if (ignitableNeighbours.Count > 0)
-            {
+            
+            if (ignitableNeighbours.Count > 0){
                 int randomIndex = Random.Range(0, ignitableNeighbours.Count);
                 return ignitableNeighbours[randomIndex];
             }
@@ -180,17 +164,16 @@ public class TileManager : MonoBehaviour
         return null;
     }
 
-    private bool hasIgnitableNeighbours(GameObject tile)
+    private bool hasIgnitableNeighbours(GameObject _tile, WindDirection wind)
     {
-        TileBehaviour script = tile.GetComponent<TileBehaviour>();
-        List<GameObject> nTiles = script.GetNeighbouringTiles();
+        TileBehaviour script = _tile.GetComponent<TileBehaviour>();
+        List<GameObject> nTiles = gridManager.getDirectionalNeighbours(script.getCellPos(),(GridManager.WindDirection)wind);
         //List<GameObject> nTiles = GetNeighbouringTiles(script.getCellPos());
         //Debug.Log("hasIgnitableNeighbours " + script.getCellPos() + " |  " + nTiles.Count);
         if (nTiles != null){
             foreach (GameObject nTile in nTiles)
             {
                 TileBehaviour nScript = nTile.GetComponent<TileBehaviour>();
-                Debug.Log(nScript.getCellPos());
                 if (nScript.CanOnFire())
                 {
                     return true;
@@ -199,40 +182,4 @@ public class TileManager : MonoBehaviour
         }
         return false;
     }
-
-    public List<GameObject> GetNeighbouringTiles(Vector3Int cellPos)
-{
-    List<GameObject> neighbours = new List<GameObject>();
-
-    int x = cellPos.x;
-    int y = cellPos.z;
-
-    if (x >= 0 && x < gridXZ.Count && y >= 0 && y < gridXZ[x].Count)
-    {
-        // NE
-        if (x < gridXZ.Count - 1 && y < gridXZ[x + 1].Count && gridXZ[x + 1][y] != null)
-            neighbours.Add(gridXZ[x + 1][y]);
-
-        // NW
-        if (x > 0 && y < gridXZ[x - 1].Count && gridXZ[x - 1][y] != null)
-            neighbours.Add(gridXZ[x - 1][y]);
-
-        // E
-        if (x < gridXZ.Count - 1 && y < gridXZ[x].Count - 1 && gridXZ[x + 1][y + 1] != null)
-            neighbours.Add(gridXZ[x + 1][y + 1]);
-
-        // SE
-        if (x < gridXZ.Count - 1 && y > 0 && gridXZ[x + 1][y - 1] != null)
-            neighbours.Add(gridXZ[x + 1][y - 1]);
-
-        // SW
-        if (x > 0 && y > 0 && gridXZ[x - 1][y - 1] != null)
-            neighbours.Add(gridXZ[x - 1][y - 1]);
-
-        // W
-        if (x > 0 && y < gridXZ[x].Count - 1 && gridXZ[x - 1][y + 1] != null)
-            neighbours.Add(gridXZ[x - 1][y + 1]);
-    }
-    return neighbours;
-}
 }

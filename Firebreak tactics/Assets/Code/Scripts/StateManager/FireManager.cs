@@ -27,7 +27,7 @@ public class FireManager : MonoBehaviour
 
     public void ChangeWindDirection()
     {
-        if (UnityEngine.Random.Range(0, 4) == 0)
+        if (UnityEngine.Random.Range(0, 8) == 0)
         {
             List<WindDirection> choices = new List<WindDirection>{
                 WindDirection.N, WindDirection.E, WindDirection.S, WindDirection.W
@@ -67,8 +67,6 @@ public class FireManager : MonoBehaviour
         {
             // upon player ending turn, check for win/loss conditions
             Debug.Log("FireManager listening");
-
-            int nextFireTiles = tileManager.GetNextFireTiles().Count;
 
             if (tileManager.hasIgnitableTiles())
             {
