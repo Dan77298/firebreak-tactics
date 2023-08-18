@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class GridManager : MonoBehaviour
 {
-    [SerializeField] private Grid grid;
+    [SerializeField] public Grid grid;
 
     public List<List<GameObject>> gridXZ = new List<List<GameObject>>();
 
     void Start()
     {
-        grid = GetComponent<Grid>();
+        //grid = GetComponent<Grid>();
 
         List<Transform> tiles = new List<Transform>();
         int gridCols = 0;
@@ -54,7 +54,7 @@ public class GridManager : MonoBehaviour
             gridXZ[tile.GetComponent<TileBehaviour>().cellPos.x][tile.GetComponent<TileBehaviour>().cellPos.y] = tile.gameObject;
         }
 
-        /*
+        
             //Example list coords use
             for (int x = 0; x < gridXZ.Count; x++)
             {
@@ -68,6 +68,6 @@ public class GridManager : MonoBehaviour
                         print("gameObj " + gridXZ[x][y].name);
                 }
             }
-         */
+         
     }
 }

@@ -37,15 +37,25 @@ public class FireManager : MonoBehaviour
             int newDirection = UnityEngine.Random.Range(0, choices.Count);
             wind = choices[newDirection];
         }
+
+        UIN.color = new Color32(171,171,171,255);
+        UIE.color = new Color32(171,171,171,255);
+        UIS.color = new Color32(171,171,171,255);
+        UIW.color = new Color32(171,171,171,255);
+
          // colour changer 
         switch (wind){
             case WindDirection.N:
+                UIN.color = new Color32(255,0,0,255);
                 break;
             case WindDirection.W:
+                UIW.color = new Color32(255,0,0,255);
                 break;
             case WindDirection.E:
+                UIE.color = new Color32(255,0,0,255);
                 break;
             default: // S
+                UIS.color = new Color32(255,0,0,255);
                 break;
         }
     }
@@ -64,7 +74,7 @@ public class FireManager : MonoBehaviour
             {
                 if (tileManager.GetFireTiles().Count > 0) // game goes on
                 {
-                    tileManager.SpreadFire();
+                    tileManager.SpreadFire((TileManager.WindDirection)wind);
                     GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn);
                 }
                 else // victory by 0 fire tiles

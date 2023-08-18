@@ -49,7 +49,6 @@ public class TileBehaviour : MonoBehaviour
         grid = transform.parent.GetComponent<Grid>();
 
         cellPos = grid.WorldToCell(new Vector3(transform.position.x, 0, transform.position.z));
-
     }
 
     private void SetDefaultState(TileType _tile){
@@ -142,6 +141,10 @@ public class TileBehaviour : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    public Vector3Int getCellPos(){
+        return cellPos;
     }
 
     public List<GameObject> GetNeighbouringTiles()
