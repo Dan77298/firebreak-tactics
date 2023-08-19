@@ -62,6 +62,11 @@ public class TileManager : MonoBehaviour
             Debug.Log("fire removed from list. Remaining: " + fireTiles.Count);
             fireTiles.Remove(tile);
         }
+
+        if (fireTiles.Count <= 0){
+        // victory by fire tiles depletion
+            GameManager.Instance.UpdateGameState(GameManager.GameState.Victory);
+        }
     }
 
     public List<GameObject> GetFireTiles(){
@@ -124,7 +129,7 @@ public class TileManager : MonoBehaviour
                             int cAdjacencies = getFireAdjacencies(cNeighbours);
                             int cVegetation = cScript.GetVegetation();
                             // change below for variation testing 
-                            if (cAdjacencies <= adjacencies || cVegetation > vegetation) 
+                            if (cAdjacencies <= adjacencies || cVegetation <= vegetation) 
                             {
                                 // if the current candidate has more fire adjacencies or vegetation than the current selected 
                                 selected = cTile;

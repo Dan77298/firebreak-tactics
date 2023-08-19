@@ -163,14 +163,25 @@ public class GridManager : MonoBehaviour
         }
 
         // add neighbours by horizontal matches
+        for (int y = ymin; y <= ymax; y++){
+            int x = cellPos.x;
+            if (x >= 0 && x < gridXZ.Count && y >= 0 && y < gridXZ[x].Count){
+                GameObject neighbour = gridXZ[x][y];
+                if (neighbour != null)
+                {
+                    neighbours.Add(neighbour);
+                }
+            }
+        }
+
+        // add neighbours by horizontal matches
         for (int x = xmin; x <= xmax; x++){
-            for (int y = ymin; y <= ymax; y++){
-                if (x >= 0 && x < gridXZ.Count && y >= 0 && y < gridXZ[x].Count){
-                    GameObject neighbour = gridXZ[x][y];
-                    if (neighbour != null)
-                    {
-                        neighbours.Add(neighbour);
-                    }
+            int y = cellPos.y;
+            if (x >= 0 && x < gridXZ.Count && y >= 0 && y < gridXZ[x].Count){
+                GameObject neighbour = gridXZ[x][y];
+                if (neighbour != null)
+                {
+                    neighbours.Add(neighbour);
                 }
             }
         }

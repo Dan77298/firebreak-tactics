@@ -11,7 +11,7 @@ public class FireManager : MonoBehaviour
     [SerializeField] private TMP_Text Turn,Turn2;
     [SerializeField] private TMP_Text Fire;
     [SerializeField] private TMP_Text UIN,UIE,UIS,UIW;
-    private int globaltime, time, Ntime = 0;
+    private int numberOfTurns, time, Ntime = 0;
 
     private void Awake()
     {
@@ -33,8 +33,8 @@ public class FireManager : MonoBehaviour
         List<WindDirection> choices = choices = new List<WindDirection>{
             WindDirection.N, WindDirection.E, WindDirection.S, WindDirection.W};
 
-        if (globaltime < 7 || Ntime < 5){
-        // wind direction can't change to north until turn 7 or if it's been 5 turns since north
+        if (Ntime < 6){
+        // wind direction can't change to north until it's been 5 turns since north
             choices.Remove(WindDirection.N);
         }
 
@@ -54,28 +54,19 @@ public class FireManager : MonoBehaviour
             choices.Remove(wind);
             int newDirection = UnityEngine.Random.Range(0, choices.Count);
             wind = choices[newDirection];
-            time ++;
+            time = 0;
             Ntime = 0; // north cooldown
         }
-        else{
-            if (wind != WindDirection.S && time >= 2){
-            // change at least every 2 turns if it isn't southernly 
-                choices.Remove(wind);
-                int newDirection = UnityEngine.Random.Range(0, choices.Count);
-                wind = choices[newDirection];
-                time ++;
-            }
-            else{
-            // sometimes change sooner 1/3 of the time
-                if (UnityEngine.Random.Range(0, 3) == 0){
-                    int newDirection = UnityEngine.Random.Range(0, choices.Count);
-                    wind = choices[newDirection];
-                    time = 0;
-                }           
-            }  
+        else if ((wind == WindDirection.S && time >= 3) || time >= 5){
+        // change wind if southernly every 3, otherwise 2 for east or west
+            choices.Remove(wind);
+            int newDirection = UnityEngine.Random.Range(0, choices.Count);
+            wind = choices[newDirection];
+            time = 0;
         }   
-        Ntime++;
-        globaltime++;
+        time++; // resets on wind change 
+        Ntime++; // prevents north overselection
+        numberOfTurns++; // tracks number of player turns  
         colourCompass();
     }
 
@@ -110,21 +101,10 @@ public class FireManager : MonoBehaviour
             // upon player ending turn, check for win/loss conditions
             Debug.Log("FireManager listening");
 
-            if (tileManager.hasTurnsRemaining())
+            if (tileManager.hasTurnsRemaining() || tileManager.GetFireTiles().Count > 0)
             {
-                if (tileManager.GetFireTiles().Count > 0) // game goes on
-                {
-                    tileManager.SpreadFire((TileManager.WindDirection)wind);
-                    GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn);
-                }
-                else // victory by 0 fire tiles
-                {
-                    GameManager.Instance.UpdateGameState(GameManager.GameState.Victory);
-                }
-            }
-            else // the fire has no more options  
-            {
-                GameManager.Instance.UpdateGameState(GameManager.GameState.Victory);
+                tileManager.SpreadFire((TileManager.WindDirection)wind);
+                GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn);
             }
         }
 
@@ -132,8 +112,8 @@ public class FireManager : MonoBehaviour
         {
             ChangeWindDirection();
             tileManager.DecayFire();
-            Turn.text = "TURN " + globaltime;
-            Turn2.text = "TURN " + globaltime;
+            Turn.text = "TURN " + numberOfTurns;
+            Turn2.text = "TURN " + numberOfTurns;
             Heat.text = "HEAT " + tileManager.GetSpreadRate();
             Fire.text = "FIRE " + tileManager.GetFireTiles().Count;
             GameManager.Instance.UpdateGameState(GameManager.GameState.PlayerTurn);
