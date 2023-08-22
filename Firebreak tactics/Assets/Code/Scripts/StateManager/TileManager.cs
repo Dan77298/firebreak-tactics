@@ -129,7 +129,7 @@ public class TileManager : MonoBehaviour
                             int cAdjacencies = getFireAdjacencies(cNeighbours);
                             int cVegetation = cScript.GetVegetation();
                             // change below for variation testing 
-                            if (cAdjacencies <= adjacencies || cVegetation <= vegetation) 
+                            if (cAdjacencies <= adjacencies || cVegetation >= vegetation) 
                             {
                                 // if the current candidate has more fire adjacencies or vegetation than the current selected 
                                 selected = cTile;

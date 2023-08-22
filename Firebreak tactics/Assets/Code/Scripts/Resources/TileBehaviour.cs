@@ -6,10 +6,7 @@ public class TileBehaviour : MonoBehaviour
 {
     // code inheritance
     [SerializeField] private MaterialChanger materialChanger; // handles changing materials 
-
-    public Grid grid;
-    public Vector3Int cellPos;
-
+    
     // tile states
     [SerializeField] private TileType tile; // what type of tile is it
     private TileType defaultTile; // what type of tile was it originally 
@@ -25,6 +22,8 @@ public class TileBehaviour : MonoBehaviour
     private int altitude = 1; // [1]low, [2]medium, [3]high 
     private int traversalCost; // cost of traversing the tile 
     private int traversalRule; // [1]all units, [2]ground only, [3]air only, [4] no traversal
+    public Vector3Int cellPos;
+    private Grid grid;
 
     // tile health
     private int vegetation; // how much health a tile has (max health)  
