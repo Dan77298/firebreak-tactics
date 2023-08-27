@@ -31,14 +31,16 @@ public class TileBehaviour : MonoBehaviour
 	
 
     public enum TileType{
-        Grass1, // veg 1, 
+        Grass1,
         Grass2,
         Grass3,
         Dirt,
         Fire,
         Water,
         Ember,
-        Burned
+        Burned,
+        Highlighted,
+        // add more here
     }
 
     private void Awake(){
@@ -53,6 +55,7 @@ public class TileBehaviour : MonoBehaviour
     private void SetDefaultState(TileType _tile){
         switch (_tile){
             case TileType.Grass1:
+                defaultTile = TileType.Grass1;
                 vegetation = 1;
                 traversalCost = 1;
                 traversalRule = 1;
@@ -62,6 +65,7 @@ public class TileBehaviour : MonoBehaviour
                 decay = 5;
                 break;
             case TileType.Grass2:
+                defaultTile = TileType.Grass2;
                 vegetation = 2;
                 traversalCost = 1;
                 traversalRule = 1;
@@ -70,6 +74,7 @@ public class TileBehaviour : MonoBehaviour
                 decay = 6;
                 break;
             case TileType.Grass3:
+                defaultTile = TileType.Grass3;
                 vegetation = 3;
                 traversalCost = 1;
                 traversalRule = 1;
@@ -78,6 +83,7 @@ public class TileBehaviour : MonoBehaviour
                 decay = 7;
                 break;
             case TileType.Dirt:
+                defaultTile = TileType.Dirt;
                 vegetation = 0;
                 hasEmbered = true;
                 traversalCost = 1;
@@ -86,6 +92,7 @@ public class TileBehaviour : MonoBehaviour
                 hasEmbered = false;
                 break;
             case TileType.Water:
+                defaultTile = TileType.Water;
                 vegetation = 0;
                 hasEmbered = true;
                 traversalCost = 1;
@@ -94,6 +101,7 @@ public class TileBehaviour : MonoBehaviour
                 hasEmbered = true;
                 break;
             case TileType.Fire:
+                defaultTile = TileType.Fire;
                 onFire = true;
                 vegetation = 0;
                 decay = 6;
@@ -101,6 +109,7 @@ public class TileBehaviour : MonoBehaviour
                 traversalRule = 3;
                 hasEmbered = false;
                 break;
+            // add more here
             default:
                 break;
         }
@@ -137,9 +146,23 @@ public class TileBehaviour : MonoBehaviour
                 onFire = false;
                 vegetation = 0;
                 break;
+            case TileType.Highlighted:
+                break;
+            // add more here
             default:
                 break;
         }
+    }
+
+    public void SetHighlighted(bool highlighted){
+    // sets highlighted on a tile
+        if (highlighted){
+            tile = TileType.Highlighted; 
+        }
+        else{
+            tile = GetDefaultTile(); 
+        }
+        changeMaterial();
     }
 
     public Vector3Int getCellPos(){
@@ -163,6 +186,7 @@ public class TileBehaviour : MonoBehaviour
             changeMaterial();
         }
     }
+
 
     public void SetOnEmber(){
         if (CanOnEmber()){

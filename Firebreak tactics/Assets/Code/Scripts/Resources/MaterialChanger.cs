@@ -17,7 +17,9 @@ public class MaterialChanger : MonoBehaviour
         Fire,
         Water,
         Ember,
-        Burned
+        Burned,
+        Highlighted
+        // add more here 
     }
 
     private void Awake()
@@ -53,9 +55,11 @@ public class MaterialChanger : MonoBehaviour
                 break; 
             case TileType.Burned:
                 objectRenderer.material = GetMaterialFromName("Burned");
+                break;
+            case TileType.Highlighted:
+                objectRenderer.material = GetMaterialFromName("Highlighted");
                 break; 
             // Add cases for other materials here
-
             default:
                 break;
         }

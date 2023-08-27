@@ -100,6 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   materialChanger: {fileID: -5260758888979952468}
   tile: 5
+  cellPos: {x: 0, y: 0, z: 0}
 --- !u!114 &-5260758888979952468
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -38,6 +38,21 @@ public class TileManager : MonoBehaviour
         }
     }
 
+    public void highlightTile(GameObject tile){
+    // sets a tile to highlighted
+        if (tile != null){
+            TileBehaviour script = tile.GetComponent<TileBehaviour>();
+            if (script.GetTileType() == TileBehaviour.TileType.Highlighted){
+                Debug.Log("false");
+                script.SetHighlighted(false);
+            }
+            else{
+                Debug.Log("true");
+                script.SetHighlighted(true);
+            }            
+        }
+    }
+
     public void updateFireTiles(){
     // write a list of all tiles named "Fire"
         foreach (Transform child in gridTiles.transform){
