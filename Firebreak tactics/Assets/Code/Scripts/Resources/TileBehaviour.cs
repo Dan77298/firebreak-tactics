@@ -30,6 +30,15 @@ public class TileBehaviour : MonoBehaviour
     private int vegetation; // how much health a tile has (max health)  
     private int decay; // how much health a tile has left (remaining)
 	
+    //pathfinding variables
+    public TileBehaviour connection { get; private set; }
+    public float G { get; private set; }
+    public float H { get; private set; }
+    public float F => G + H;
+
+    public void SetConnection(TileBehaviour tile) => connection = tile;
+    public void SetG(float g) => G = g;
+    public void SetH(float h) => H = h;
 
     public enum TileType{
         Grass1, // veg 1, 
@@ -260,5 +269,21 @@ public class TileBehaviour : MonoBehaviour
     {
         MaterialChanger.TileType materialType = (MaterialChanger.TileType)tile;
         materialChanger.SetTile(materialType);
+    }
+
+    public int GetTraversalRule()
+    {
+        return this.traversalRule;
+    }
+
+    public int GetDistance(TileBehaviour target)
+    {
+        Vector3Int targetCoords = target.cellPos;
+
+        return Mathf.Max(
+            Mathf.Abs(targetCoords.y - cellPos.y),
+            Mathf.Abs(targetCoords.y - cellPos.y),
+            Mathf.Abs(targetCoords.y - cellPos.y)
+            );
     }
 }
