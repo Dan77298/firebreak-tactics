@@ -9,6 +9,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private TileManager tileManager;
     [SerializeField] private UnitManager unitManager;
     [SerializeField] private InputActionReference Keyboard, Click;
+    [SerializeField] private float cameraMoveSpeed = 5f;
+    [SerializeField] private float edgeScrollThreshold = 20f;
 
     private GameManager.GameState currentState;
     private float mouseButtonValue;
@@ -16,6 +18,7 @@ public class PlayerController : MonoBehaviour
     private GameObject previousTile = null;
     private GameObject selectedTile = null;
     private Vector3 mouseStart;
+
 
     private void Awake()
     {
@@ -31,9 +34,11 @@ public class PlayerController : MonoBehaviour
 
     private void Update(){
         if (Input.GetMouseButtonUp(0)){
-        // LMB up
+        // Handle mouse release
             releaseMouse();
         }
+
+        HandleCameraMovement();
 
         if (currentState == GameManager.GameState.PlayerTurn){
         // if it's the player's turn
@@ -90,6 +95,30 @@ public class PlayerController : MonoBehaviour
                 previousTile = null;
             }    
         }
+    }
+
+    private void HandleCameraMovement(){
+        // Vector2 movementInput = Keyboard.action.ReadValue<Vector2>();
+
+        // Vector3 cameraMovement = new Vector3(movementInput.x, 0f, movementInput.z);
+        // Camera.main.transform.Translate(cameraMovement);
+
+        // Vector2 mousePosition = Mouse.current.position.ReadValue();
+        // Vector2 screenSize = new Vector2(Screen.width, Screen.height);
+
+        // if (mousePosition.x <= edgeScrollThreshold){
+        //     Camera.main.transform.Translate(Vector3.left * cameraMoveSpeed * Time.deltaTime);
+        // }
+        // else if (mousePosition.x >= screenSize.x - edgeScrollThreshold){
+        //     Camera.main.transform.Translate(Vector3.right * cameraMoveSpeed * Time.deltaTime);
+        // }
+
+        // if (mousePosition.y <= edgeScrollThreshold){
+        //     Camera.main.transform.Translate(Vector3.back * cameraMoveSpeed * Time.deltaTime);
+        // }
+        // else if (mousePosition.y >= screenSize.y - edgeScrollThreshold){
+        //     Camera.main.transform.Translate(Vector3.forward * cameraMoveSpeed * Time.deltaTime);
+        // }
     }
 
     private void moveWithMouse(GameObject unit){
