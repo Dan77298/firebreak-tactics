@@ -10,10 +10,12 @@ public class TileBehaviour : MonoBehaviour
     // tile states
     [SerializeField] private TileType tile; // what type of tile is it
     private TileType defaultTile; // what type of tile was it originally 
+    private GameObject occupyingUnit = null;
     private bool onFire = false; // is the tile burning
     private bool onEmber = false; // is the tile embering 
     private bool burned = false; // is the tile fully depleted naturally 
     private bool hasEmbered = false; // has the tile used its ember state 
+    [SerializeField] private Vector3Int cellPos;
 
     private Material tileMaterial; // the tile's default material 
     private Material displayMaterial; // the tile's displayed material 
@@ -22,7 +24,6 @@ public class TileBehaviour : MonoBehaviour
     private int altitude = 1; // [1]low, [2]medium, [3]high 
     private int traversalCost; // cost of traversing the tile 
     private int traversalRule; // [1]all units, [2]ground only, [3]air only, [4] no traversal
-    public Vector3Int cellPos;
     private Grid grid;
 
     // tile health
@@ -40,6 +41,7 @@ public class TileBehaviour : MonoBehaviour
         Ember,
         Burned,
         Highlighted,
+        Selected,
         // add more here
     }
 
@@ -48,8 +50,8 @@ public class TileBehaviour : MonoBehaviour
         SetDefaultState(tile);
 
         grid = transform.parent.GetComponent<Grid>();
-
         cellPos = grid.WorldToCell(new Vector3(transform.position.x, 0, transform.position.z));
+
     }
 
     private void SetDefaultState(TileType _tile){
@@ -148,15 +150,17 @@ public class TileBehaviour : MonoBehaviour
                 break;
             case TileType.Highlighted:
                 break;
+            case TileType.Selected:
+                break;
             // add more here
             default:
                 break;
         }
     }
 
-    public void SetHighlighted(bool highlighted){
+    public void highlightTile(bool highlight){
     // sets highlighted on a tile
-        if (highlighted){
+        if (highlight){
             tile = TileType.Highlighted; 
         }
         else{
@@ -165,8 +169,31 @@ public class TileBehaviour : MonoBehaviour
         changeMaterial();
     }
 
+    public void selectTile(bool select){
+    // sets highlighted on a tile
+        if (select){
+            tile = TileType.Selected; 
+        }
+        else{
+            tile = GetDefaultTile(); 
+        }
+        changeMaterial();
+    }
+
+    public bool IsOccupied(){
+        return occupyingUnit != null;
+    }
+
+    public GameObject GetOccupyingUnit(){
+        return occupyingUnit;
+    }
+
+    public void SetOccupyingUnit(GameObject unit){
+        occupyingUnit = unit;
+    }
+
     public Vector3Int getCellPos(){
-        return cellPos;
+        return grid.WorldToCell(new Vector3(transform.position.x, 0, transform.position.z));
     }
 
     public bool GetOnFire(){

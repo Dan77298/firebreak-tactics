@@ -18,7 +18,8 @@ public class MaterialChanger : MonoBehaviour
         Water,
         Ember,
         Burned,
-        Highlighted
+        Highlighted,
+        Selected
         // add more here 
     }
 
@@ -58,6 +59,9 @@ public class MaterialChanger : MonoBehaviour
                 break;
             case TileType.Highlighted:
                 objectRenderer.material = GetMaterialFromName("Highlighted");
+                break; 
+            case TileType.Selected:
+                objectRenderer.material = GetMaterialFromName("Selected");
                 break; 
             // Add cases for other materials here
             default:

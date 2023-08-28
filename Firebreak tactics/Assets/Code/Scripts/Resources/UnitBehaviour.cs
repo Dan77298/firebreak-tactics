@@ -13,13 +13,37 @@ public class UnitBehaviour : MonoBehaviour
     [SerializeField] private bool extinguish; // unit can put out fires
     [SerializeField] private bool support; // unit can replenish other units 
 
+   	[SerializeField] private Vector3Int cellPos;
+   	[SerializeField] private Vector3Int originPos; // position before the end of turn
+
     private int water;
-    private Vector3Int cellPos;
+    private GameObject occupyingTile = null;
     private Grid grid;
 
     void Awake()
     {
         grid = transform.parent.GetComponent<Grid>();
-        cellPos = grid.WorldToCell(new Vector3(transform.position.x, 0, transform.position.z));
+        setOriginPos();
+    }
+
+    public void SetOccupyingTile(GameObject tile){
+    	this.occupyingTile = tile;
+    }
+
+    public GameObject GetOccupyingTile(){
+    	return occupyingTile;
+    }
+
+    public Vector3Int getOriginPos(){
+    	return originPos;
+    }
+
+    public void setOriginPos(){
+    	originPos = grid.WorldToCell(new Vector3(transform.position.x, 0, transform.position.z));
+    	cellPos = originPos;
+    }
+
+    public Vector3Int getCellPos(){
+    	return grid.WorldToCell(new Vector3(transform.position.x, 0, transform.position.z));
     }
 }

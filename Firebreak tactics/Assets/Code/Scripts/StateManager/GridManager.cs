@@ -33,8 +33,6 @@ public class GridManager : MonoBehaviour
             {
                 Vector3Int cellPos = grid.WorldToCell(new Vector3(child.transform.position.x, 0, child.transform.position.z));
 
-                child.GetComponent<TileBehaviour>().cellPos = cellPos;
-
                 if (cellPos.x >= 0 && cellPos.y >= 0)
                 {
                     tiles.Add(child);
@@ -61,7 +59,7 @@ public class GridManager : MonoBehaviour
         //can be checked to see if tiles are null
         foreach (Transform tile in tiles)
         {
-            gridXZ[tile.GetComponent<TileBehaviour>().cellPos.x][tile.GetComponent<TileBehaviour>().cellPos.y] = tile.gameObject;
+            gridXZ[tile.GetComponent<TileBehaviour>().getCellPos().x][tile.GetComponent<TileBehaviour>().getCellPos().y] = tile.gameObject;
         }
 
         // for (int x = 0; x < gridXZ.Count; x++)
@@ -86,7 +84,7 @@ public class GridManager : MonoBehaviour
             foreach (GameObject tile in row){
                 if (tile != null){
                     TileBehaviour tileBehavior = tile.GetComponent<TileBehaviour>();
-                    List<GameObject> neighbours = getNeighbours(tileBehavior.cellPos);
+                    List<GameObject> neighbours = getNeighbours(tileBehavior.getCellPos());
                     neighbourLookup[tile] = neighbours;
                 }
             }
@@ -193,7 +191,7 @@ public class GridManager : MonoBehaviour
         if (!neighbourLookup.ContainsKey(_tile)){
             TileBehaviour tileBehavior = _tile.GetComponent<TileBehaviour>();
             if (tileBehavior != null){
-                List<GameObject> neighbours = getNeighbours(tileBehavior.cellPos);
+                List<GameObject> neighbours = getNeighbours(tileBehavior.getCellPos());
                 neighbourLookup[_tile] = neighbours;
             }
         }
@@ -209,5 +207,13 @@ public class GridManager : MonoBehaviour
     public Dictionary<GameObject, List<GameObject>> getNeighbourLookup(){
     // get the lookup dictionary
         return neighbourLookup;
+    }
+
+    public GameObject getTile(Vector3Int cellPos){
+        if (cellPos.x >= 0 && cellPos.x < gridXZ.Count && cellPos.y >= 0 && cellPos.y < gridXZ[cellPos.x].Count)
+        {
+            return gridXZ[cellPos.x][cellPos.y];
+        }
+        return null; // If the cell position is out of bounds
     }
 }
