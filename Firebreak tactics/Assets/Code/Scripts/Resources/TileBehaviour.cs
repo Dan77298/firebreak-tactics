@@ -259,6 +259,7 @@ public class TileBehaviour : MonoBehaviour
             burned = true;
             gameObject.name = "Burned";
             tile = TileType.Burned;
+            defaultTile = tile;
             ChangeTileState(tile);
             changeMaterial();
         } 

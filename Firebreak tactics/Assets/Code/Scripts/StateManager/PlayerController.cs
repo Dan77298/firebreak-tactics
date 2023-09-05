@@ -10,81 +10,53 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private UnitManager unitManager;
     [SerializeField] private InputActionReference Keyboard, Click;
     [SerializeField] private float cameraMoveSpeed = 5f;
+    [SerializeField] private GameObject cameraHolder;
     [SerializeField] private float edgeScrollThreshold = 20f;
+    [SerializeField] private float maxZoom = 60.0f;
+    [SerializeField] private float minZoom = 20.0f;
 
     private GameManager.GameState currentState;
-    private float mouseButtonValue;
     private Ray ray; 
     private GameObject previousTile = null;
     private GameObject selectedTile = null;
+    private GameObject upTile = null;
+    private GameObject downTile = null;
+    private GameObject clickedUnit = null;
+    private bool dragging = false;
     private Vector3 mouseStart;
 
 
     private void Awake()
     {
         GameManager.OnGameStateChanged += GameStateChanged;
-        Click.action.performed += HandleMouseClick;
+        Click.action.performed += HandleMouseDown;
     }
 
     private void OnDestroy()
     {
         GameManager.OnGameStateChanged -= GameStateChanged;
-        Click.action.performed -= HandleMouseClick;
+        Click.action.performed -= HandleMouseDown;
     }
 
     private void Update(){
-        if (Input.GetMouseButtonUp(0)){
-        // Handle mouse release
-            releaseMouse();
+        if (Mouse.current.leftButton.ReadValue() == 0f){
+            handleMouseRelease();
         }
-
-        HandleCameraMovement();
+        checkCameraMovement();
 
         if (currentState == GameManager.GameState.PlayerTurn){
         // if it's the player's turn
             ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
             RaycastHit hit;
-
             if (Physics.Raycast(ray, out hit)){
             // if player has their mouse over a tile
                 GameObject selected = hit.collider.gameObject;
                 TileBehaviour script = selected.GetComponent<TileBehaviour>();
-
-                if (mouseButtonValue == 1f && selectedTile){
+                if (Mouse.current.leftButton.ReadValue() == 1f && selectedTile){
                 // unit tracks mouse movement when mouse is down
-                    moveWithMouse(unitManager.GetUnitOnTile(selectedTile));
+                    dragUnit(unitManager.GetUnitOnTile(selectedTile));
                 }
-                if (selected != previousTile && belongsTo(selected, tiles.transform)){
-                // new tile selected 
-                    if (mouseButtonValue == 0f){
-                    // LMB up
-                        if (selected.GetComponent<TileBehaviour>().IsOccupied()){
-                        // if the selected tile is occupied by a unit 
-                            script.highlightTile(true);                          
-                        }
-                        else{
-                            script.highlightTile(false); 
-                        }
-                        if (previousTile){
-                            previousTile.GetComponent<TileBehaviour>().highlightTile(false);
-                        }
-                        previousTile = selected;  
-                    }
-                    else if (mouseButtonValue == 1f && selectedTile){
-                    // LMB down
-                        
-                        if (!selected.GetComponent<TileBehaviour>().IsOccupied()){
-                            script.selectTile(true);
-                        }
-                        else{
-                            script.selectTile(false);
-                        }
-                        if (previousTile){
-                            previousTile.GetComponent<TileBehaviour>().selectTile(false);
-                        }
-                        previousTile = selected;  
-                    }
-                }
+                checkMouseOverTile(selected, script);
             }
             else{
             // no selected tile 
@@ -97,31 +69,73 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void HandleCameraMovement(){
-        // Vector2 movementInput = Keyboard.action.ReadValue<Vector2>();
-
-        // Vector3 cameraMovement = new Vector3(movementInput.x, 0f, movementInput.z);
-        // Camera.main.transform.Translate(cameraMovement);
-
-        // Vector2 mousePosition = Mouse.current.position.ReadValue();
-        // Vector2 screenSize = new Vector2(Screen.width, Screen.height);
-
-        // if (mousePosition.x <= edgeScrollThreshold){
-        //     Camera.main.transform.Translate(Vector3.left * cameraMoveSpeed * Time.deltaTime);
-        // }
-        // else if (mousePosition.x >= screenSize.x - edgeScrollThreshold){
-        //     Camera.main.transform.Translate(Vector3.right * cameraMoveSpeed * Time.deltaTime);
-        // }
-
-        // if (mousePosition.y <= edgeScrollThreshold){
-        //     Camera.main.transform.Translate(Vector3.back * cameraMoveSpeed * Time.deltaTime);
-        // }
-        // else if (mousePosition.y >= screenSize.y - edgeScrollThreshold){
-        //     Camera.main.transform.Translate(Vector3.forward * cameraMoveSpeed * Time.deltaTime);
-        // }
+    private void checkMouseOverTile(GameObject selected, TileBehaviour script){
+        if (selected != previousTile && belongsTo(selected, tiles.transform) && selected.name != "Fire"){
+        // new tile selected 
+            if (Mouse.current.leftButton.ReadValue() == 0f){
+            // LMB up
+                if (selected.GetComponent<TileBehaviour>().IsOccupied()){
+                // if the selected tile is occupied by a unit 
+                    script.highlightTile(true);                          
+                }
+                else{
+                    script.highlightTile(false); 
+                }
+                if (previousTile){
+                    previousTile.GetComponent<TileBehaviour>().highlightTile(false);
+                }   
+                previousTile = selected;  
+            }
+            else if (Mouse.current.leftButton.ReadValue() == 1f && selectedTile){
+            // LMB down
+                clickedUnit = null;
+                if (!selected.GetComponent<TileBehaviour>().IsOccupied()){
+                    script.selectTile(true);
+                }
+                else{
+                    script.selectTile(false);
+                }
+                if (previousTile){
+                    previousTile.GetComponent<TileBehaviour>().selectTile(false);
+                }
+                previousTile = selected; 
+            }
+        }
     }
 
-    private void moveWithMouse(GameObject unit){
+    private void checkCameraMovement(){
+    // move camera based on mouse and keyboard input
+        Vector2 movementInput = Keyboard.action.ReadValue<Vector2>();
+        Vector3 cameraMovement = new Vector3(movementInput.x, 0f, movementInput.y);
+        cameraHolder.transform.Translate(cameraMovement * cameraMoveSpeed * Time.deltaTime);
+
+        Vector2 mousePosition = Mouse.current.position.ReadValue();
+        Vector2 screenSize = new Vector2(Screen.width, Screen.height);
+
+        if (mousePosition.x <= edgeScrollThreshold){
+            cameraHolder.transform.Translate(Vector3.left * cameraMoveSpeed * Time.deltaTime);
+        }
+        else if (mousePosition.x >= screenSize.x - edgeScrollThreshold){
+            cameraHolder.transform.Translate(Vector3.right * cameraMoveSpeed * Time.deltaTime);
+        }
+
+        if (mousePosition.y <= edgeScrollThreshold){
+            cameraHolder.transform.Translate(Vector3.back * cameraMoveSpeed * Time.deltaTime);
+        }
+        else if (mousePosition.y >= screenSize.y - edgeScrollThreshold){
+            cameraHolder.transform.Translate(Vector3.forward * cameraMoveSpeed * Time.deltaTime);
+        }
+
+        // Zooming with the scroll wheel
+        float scrollWheel = Mouse.current.scroll.ReadValue().y * 0.1f;
+        float zoomSpeed = 0.1f;
+
+        Camera.main.fieldOfView = Mathf.Clamp(Camera.main.fieldOfView - scrollWheel * zoomSpeed, minZoom, maxZoom);
+    }
+
+    private void dragUnit(GameObject unit){
+    // make unit follow cursor 
+        dragging = true;
         Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit hit;
 
@@ -142,60 +156,134 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void HandleMouseClick(InputAction.CallbackContext context){
+    private void HandleMouseDown(InputAction.CallbackContext context){
+    // fired when LMB down
 
         if (currentState == GameManager.GameState.PlayerTurn){
-            mouseButtonValue = Mouse.current.leftButton.ReadValue();
-            Debug.Log("handlemouseClick");
             if (context.action == Click.action){
+                ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+                RaycastHit hit;
+
+                if (Physics.Raycast(ray, out hit)){
                 
-                if (mouseButtonValue == 1f){
-                // LMB is down
-                    ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-                    RaycastHit hit;
+                    downTile = hit.collider.gameObject;
 
-                    if (Physics.Raycast(ray, out hit)){
-                        GameObject selected = hit.collider.gameObject;
-
-                        if (belongsTo(selected, tiles.transform)){
+                    if (Mouse.current.leftButton.ReadValue() == 1f){
+                    // LMB is down
+                        if (belongsTo(downTile, tiles.transform)){
                         // tile is clicked
-                            if (selected.GetComponent<TileBehaviour>().IsOccupied()){
-                            // selecting a unit 
-                                selectUnit(selected);
+                            if (downTile.GetComponent<TileBehaviour>().IsOccupied()){
+                            // selecting a unit
+                                Debug.Log("selectUnit"); 
+                                selectUnit(downTile);
                             }
-                        }
+                        }  
                     }
+                    else if (Mouse.current.rightButton.ReadValue() == 1f){
+                    // RMB is down
+                        unitManager.requestCancel(downTile);
+                    }  
                 }
             }
         }
     }
 
-    private void releaseMouse(){
+    private void handleMouseRelease(){
         ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit hit;
-
         if (Physics.Raycast(ray, out hit)){
-            GameObject selected = hit.collider.gameObject;
+            upTile = hit.collider.gameObject;
 
-            if (belongsTo(selected, tiles.transform) && selectedTile){
-            // mouse is released on a tile 
-                GameObject unit = unitManager.GetUnitOnTile(selectedTile);
-                unitManager.moveUnitToTile(unit, selected);
-                selected.GetComponent<TileBehaviour>().highlightTile(false);
-                CenterUnitToTile(unit, selected);
+            if (downTile == upTile){
+            // mouse is released on same tile
+                handleMouseClick();
             }
         }
-        selectedTile = null;
-        previousTile = null;
-        mouseButtonValue = 0f;
+        if (dragging){
+            dropUnit();
+        }
+        mouseUp();
+    }
+        
+    private void handleUnitInteraction(){
+    // unit to unit interaction
+        GameObject unit = unitManager.GetUnitOnTile(upTile);
+
+        if (clickedUnit.GetComponent<UnitBehaviour>().getSupport()){
+        // if the interaction is to refill another unit 
+            unitManager.interactUnit(clickedUnit, upTile);
+        }
+        else{
+        // if it's not to refill another unit, swap clickedUnits
+            clickedUnit = unit; 
+        }
+        closeInteraction();   
     }
 
-    private void CenterUnitToTile(GameObject unit, GameObject tile)
-    {
-        Vector3 tilePosition = tile.transform.position;
-        Vector3Int cellPos = units.WorldToCell(tilePosition); // Convert to cell position
+    private void mouseUp(){
+        //selectedTile = null;
+        //previousTile = null;
+        mouseStart = Vector3.zero; 
+        dragging = false;
+    }
 
-        Vector3 gridPosition = units.transform.position; // Get Grid's position in world space
+    private void closeInteraction(){
+        dragging = false;
+        clickedUnit = null;
+        upTile = null;
+        downTile = null;
+    }
+
+    private void handleTileInteraction(){
+    // determines action type
+        TileBehaviour script = upTile.GetComponent<TileBehaviour>();
+        if (upTile.name == "Fire"){
+        // fire tile
+            unitManager.interactFire(clickedUnit, upTile);
+        }
+        else if (upTile.name != "Water" && upTile.name != "Road"){
+        // regular tile 
+            unitManager.interactTile(clickedUnit, upTile);
+        }
+        closeInteraction();
+    }
+
+
+    private void handleMouseClick(){
+    // mouse click
+        if (upTile.GetComponent<TileBehaviour>().IsOccupied()){
+        // if the click is on a unit 
+            GameObject upUnit = unitManager.GetUnitOnTile(upTile);      
+            if (clickedUnit && clickedUnit != upUnit){
+            // if a unit was clicked and then a new unit is clicked
+                handleUnitInteraction();
+            }
+            else if (clickedUnit == null && upUnit){
+            // if there's no unit selected 
+                clickedUnit = upUnit;
+            }        
+        }
+        else if (clickedUnit){
+        // if a unit was previously clicked and a tile is clicked 
+            handleTileInteraction();
+        }    
+    }
+
+    private void dropUnit(){
+    // drop the unit on the tile 
+
+        GameObject unit = unitManager.GetUnitOnTile(downTile);
+        unitManager.moveUnitToTile(unit, upTile);
+        downTile.GetComponent<TileBehaviour>().highlightTile(false);
+        CenterUnitToTile(unit, upTile);
+    }
+
+    private void CenterUnitToTile(GameObject unit, GameObject tile){
+
+        Vector3 tilePosition = tile.transform.position;
+        Vector3Int cellPos = units.WorldToCell(tilePosition); 
+
+        Vector3 gridPosition = units.transform.position;
         Vector3 adjustedNewPosition = units.GetCellCenterWorld(cellPos) + new Vector3(gridPosition.x+0.1f, 0f, gridPosition.z-0.3f);
 
         adjustedNewPosition.y = unit.transform.position.y;
@@ -204,19 +292,18 @@ public class PlayerController : MonoBehaviour
     }
 
     private void selectUnit(GameObject tile){
-        Debug.Log("grabbed unit");
         selectedTile = tile;
     }
 
-    private bool belongsTo(GameObject obj, Transform gridTransform)
-    {
+    private bool belongsTo(GameObject obj, Transform gridTransform){
         return obj.transform.IsChildOf(gridTransform);
     }
 
-    private void GameStateChanged(GameManager.GameState newState)
-    {
+    private void GameStateChanged(GameManager.GameState newState){
+    // set unit positions at start of turn 
         currentState = newState;
         if (currentState == GameManager.GameState.PlayerTurn){
+            closeInteraction();
             foreach (Transform unitTransform in units.transform){
             // set all unit originPos
                 if (unitTransform.tag == "Unit"){

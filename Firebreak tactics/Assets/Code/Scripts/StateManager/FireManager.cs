@@ -7,6 +7,7 @@ public class FireManager : MonoBehaviour
 {
     [SerializeField] private WindDirection wind = WindDirection.S; // south default to establish game
     [SerializeField] private TileManager tileManager;
+    [SerializeField] private UnitManager unitManager;
     [SerializeField] private TMP_Text Heat;
     [SerializeField] private TMP_Text Turn,Turn2;
     [SerializeField] private TMP_Text Fire;
@@ -93,6 +94,30 @@ public class FireManager : MonoBehaviour
         }
     }
 
+    private void handleUnitActions(){
+        foreach (var action in unitManager.getUnitActions()){
+        // check all actions 
+            TileBehaviour targetScript = action.Value.GetComponent<TileBehaviour>();
+            UnitBehaviour unitScript = action.Key.GetComponent<UnitBehaviour>();
+            
+            if (targetScript.GetOccupyingUnit() && unitScript.getSupport()){
+            // if the action is between two units 
+                Debug.Log("support action");
+                //unitManager.transferWater(unitManager.GetUnitOnTile(action.Key), unitManager.GetUnitOnTile(action.Value));
+            }
+            else if (unitScript.getExtinguish() && (action.Value.name == "Fire" || action.Value.name == "Ember")){
+            // if the action is an extinguish 
+                Debug.Log("extinguish action");
+            }
+            else if (unitScript.getPreventative()){
+            // if the action is a preventative 
+                if (action.Value.name != "Fire" && action.Value.name != "Water" && action.Value.name != "Ember" && action.Value.name != "Road"){
+                    Debug.Log("preventative action");
+                }
+            }
+        }
+    }
+
     private void GameStateChanged(GameManager.GameState _state)
     {
 
@@ -100,7 +125,7 @@ public class FireManager : MonoBehaviour
         {
             // upon player ending turn, check for win/loss conditions
             Debug.Log("FireManager listening");
-
+            handleUnitActions();
             if (tileManager.hasTurnsRemaining() || tileManager.GetFireTiles().Count > 0)
             {
                 tileManager.SpreadFire((TileManager.WindDirection)wind);

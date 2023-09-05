@@ -46,4 +46,32 @@ public class UnitBehaviour : MonoBehaviour
     public Vector3Int getCellPos(){
     	return grid.WorldToCell(new Vector3(transform.position.x, 0, transform.position.z));
     }
+
+    public bool getSupport(){
+    	return support;
+    }
+
+    public bool getPreventative(){
+    	return preventative;
+    }
+
+    public bool getExtinguish(){
+    	return extinguish;
+    }
+
+    public int getWater(){
+    	return water;
+    }
+
+    public int getCapacity(){
+    	return capacity;
+    }
+
+    public void refillWater(){
+    	water = capacity;
+    }
+
+    public void useWater(int water){
+    	this.water=- water;
+    }
 }
