@@ -13,6 +13,7 @@ public class FireManager : MonoBehaviour
     [SerializeField] private TMP_Text Fire;
     [SerializeField] private TMP_Text UIN,UIE,UIS,UIW;
     private int numberOfTurns, time, Ntime = 0;
+    private List<GameObject> tileImmunities = new List<GameObject>(); // list of all prevented tiles 
 
     private void Awake()
     {
@@ -99,24 +100,52 @@ public class FireManager : MonoBehaviour
         // check all actions 
             TileBehaviour targetScript = action.Value.GetComponent<TileBehaviour>();
             UnitBehaviour unitScript = action.Key.GetComponent<UnitBehaviour>();
-            
-            if (targetScript.GetOccupyingUnit() && unitScript.getSupport()){
-            // if the action is between two units 
-                Debug.Log("support action");
-                //unitManager.transferWater(unitManager.GetUnitOnTile(action.Key), unitManager.GetUnitOnTile(action.Value));
-            }
-            else if (unitScript.getExtinguish() && (action.Value.name == "Fire" || action.Value.name == "Ember")){
-            // if the action is an extinguish 
-                Debug.Log("extinguish action");
-            }
-            else if (unitScript.getPreventative()){
-            // if the action is a preventative 
-                if (action.Value.name != "Fire" && action.Value.name != "Water" && action.Value.name != "Ember" && action.Value.name != "Road"){
-                    Debug.Log("preventative action");
+            if (action.Value != null && action.Key != null){
+                if (targetScript.GetOccupyingUnit() && unitScript.getSupport()){
+                // if the action is between two units 
+                    unitManager.transferWater(action.Key, unitManager.GetUnitOnTile(action.Value));
+                }
+                else if (unitScript.getExtinguish() && (action.Value.name == "Fire" || action.Value.name == "Ember")){
+                // if the action is an extinguish 
+                    tileManager.Extinguish(action.Value);
+                }
+                else if (action.Value.name == "Water"){
+                // if the action is to refill unit
+                    unitManager.refillUnit(action.Key, action.Value);
+                }
+                else if (unitScript.getPreventative()){
+                // if the action is a preventative 
+                    if (action.Value.name != "Fire" && action.Value.name != "Water" && action.Value.name != "Ember" && action.Value.name != "Road"){
+                        TileBehaviour tileScript = action.Value.GetComponent<TileBehaviour>();
+                        Debug.Log(action.Value);
+                        tileImmunities.Add(action.Value);
+                        tileScript.applyFoam(5);
+                    }
                 }
             }
         }
     }
+
+    private void checkTileImmunities(){
+        List<GameObject> depleted = new List<GameObject>();
+
+        foreach (GameObject tile in tileImmunities){
+            TileBehaviour tileScript = tile.GetComponent<TileBehaviour>();
+            if (tileScript != null){
+                if (tileScript.getPrevent() > 0){
+                    tileScript.depleteFoam();
+                }
+                else{
+                    depleted.Add(tile);
+                }
+            }
+        }
+
+        foreach (GameObject tile in depleted){
+            tileImmunities.Remove(tile);
+        }
+    }
+
 
     private void GameStateChanged(GameManager.GameState _state)
     {
@@ -126,6 +155,7 @@ public class FireManager : MonoBehaviour
             // upon player ending turn, check for win/loss conditions
             Debug.Log("FireManager listening");
             handleUnitActions();
+            checkTileImmunities();
             if (tileManager.hasTurnsRemaining() || tileManager.GetFireTiles().Count > 0)
             {
                 tileManager.SpreadFire((TileManager.WindDirection)wind);

@@ -19,7 +19,8 @@ public class MaterialChanger : MonoBehaviour
         Ember,
         Burned,
         Highlighted,
-        Selected
+        Selected,
+        Road,
         // add more here 
     }
 
@@ -62,6 +63,9 @@ public class MaterialChanger : MonoBehaviour
                 break; 
             case TileType.Selected:
                 objectRenderer.material = GetMaterialFromName("Selected");
+                break; 
+            case TileType.Road:
+                objectRenderer.material = GetMaterialFromName("Road");
                 break; 
             // Add cases for other materials here
             default:

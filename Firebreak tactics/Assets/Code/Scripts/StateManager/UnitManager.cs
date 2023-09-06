@@ -122,6 +122,15 @@ public class UnitManager : MonoBehaviour
         }
     }
 
+    public void refillUnit(GameObject unit, GameObject waterTile){
+    // unit uses their action to get more water 
+        UnitBehaviour unitScript = unit.GetComponent<UnitBehaviour>();
+        TileBehaviour tileScript = waterTile.GetComponent<TileBehaviour>();
+
+        unitScript.refillWater();
+        tileScript.depleteWater();
+    }
+
     public void transferWater(GameObject tanker, GameObject target){
     // transfer water from tanker to target 
         UnitBehaviour tankerScript = tanker.GetComponent<UnitBehaviour>();
@@ -130,8 +139,8 @@ public class UnitManager : MonoBehaviour
         if (targetScript.getWater() < targetScript.getCapacity() && tankerScript.getWater() > 0){
         // if the tanker has water and the target doesnt have full water
             
-            int amount = Mathf.Min(tankerScript.getWater(), targetScript.getCapacity() - targetScript.getWater());
-
+            int amount = Mathf.Min(tankerScript.getWater(), (targetScript.getCapacity() - targetScript.getWater()));
+            Debug.Log("amount: " + amount);
             // Transfer water from the tanker to the target
             tankerScript.useWater(amount);
             targetScript.refillWater();

@@ -156,6 +156,20 @@ public class TileManager : MonoBehaviour
         }
     }
 
+    public void Extinguish(GameObject tile){
+        List<GameObject> extinguishList = new List<GameObject>();
+
+        foreach (GameObject fTile in fireTiles){
+            if (fTile == tile){
+                TileBehaviour script = fTile.GetComponent<TileBehaviour>();
+                script.applyFoam(3);
+                fireTiles.Remove(fTile);
+                script.Extinguish();
+                break;
+            }
+        } 
+    }
+
     public bool hasTurnsRemaining(){
         foreach (GameObject tiles in fireTiles){
         // for all fire tiles

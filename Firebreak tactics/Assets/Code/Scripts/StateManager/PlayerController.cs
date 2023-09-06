@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour
     private GameObject downTile = null;
     private GameObject clickedUnit = null;
     private bool dragging = false;
+    private string actionRejected = "";
     private Vector3 mouseStart;
 
 
@@ -228,7 +229,8 @@ public class PlayerController : MonoBehaviour
     }
 
     private void closeInteraction(){
-        dragging = false;
+        actionRejected = "";
+        dragging = false;  
         clickedUnit = null;
         upTile = null;
         downTile = null;
@@ -236,14 +238,31 @@ public class PlayerController : MonoBehaviour
 
     private void handleTileInteraction(){
     // determines action type
-        TileBehaviour script = upTile.GetComponent<TileBehaviour>();
+        TileBehaviour tileScript = upTile.GetComponent<TileBehaviour>();
+        UnitBehaviour unitScript = clickedUnit.GetComponent<UnitBehaviour>();
         if (upTile.name == "Fire"){
         // fire tile
-            unitManager.interactFire(clickedUnit, upTile);
+            if (unitScript.getWater() > 0){
+            // if the unit has water 
+                unitManager.interactFire(clickedUnit, upTile);
+            }
+            else{
+                actionRejected = "unit has no water";
+            }  
         }
-        else if (upTile.name != "Water" && upTile.name != "Road"){
+        else if (upTile.name == "Water"){
+        // water tile (refill)
+            if (tileScript.getCapacity() >0 && (unitScript.getWater() < unitScript.getCapacity())){
+            // if the tile has water left 
+              unitManager.interactTile(clickedUnit, upTile);  
+            }
+        }
+        else if (upTile.name != "Road" && upTile.name != "Burned"){
         // regular tile 
             unitManager.interactTile(clickedUnit, upTile);
+        }
+        else{
+            actionRejected = "tile cannot be interacted with"; // check where this occurs, make edge cases for it 
         }
         closeInteraction();
     }

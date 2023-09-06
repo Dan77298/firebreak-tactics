@@ -15,6 +15,8 @@ public class TileBehaviour : MonoBehaviour
     private bool onEmber = false; // is the tile embering 
     private bool burned = false; // is the tile fully depleted naturally 
     private bool hasEmbered = false; // has the tile used its ember state 
+    private int prevent = 0; // how many turns of preventative the tile has 
+    private int capacity = 0; // for water tiles 
     [SerializeField] private Vector3Int cellPos;
 
     private Material tileMaterial; // the tile's default material 
@@ -42,6 +44,7 @@ public class TileBehaviour : MonoBehaviour
         Burned,
         Highlighted,
         Selected,
+        Road,
         // add more here
     }
 
@@ -96,6 +99,7 @@ public class TileBehaviour : MonoBehaviour
             case TileType.Water:
                 defaultTile = TileType.Water;
                 vegetation = 0;
+                capacity = 3;
                 hasEmbered = true;
                 traversalCost = 1;
                 traversalRule = 3;
@@ -110,6 +114,12 @@ public class TileBehaviour : MonoBehaviour
                 traversalCost = 2;
                 traversalRule = 3;
                 hasEmbered = false;
+                break;
+            case TileType.Road:
+                defaultTile = TileType.Road;
+                decay = 0;
+                traversalCost = 0;
+                traversalRule = 1;
                 break;
             // add more here
             default:
@@ -152,10 +162,25 @@ public class TileBehaviour : MonoBehaviour
                 break;
             case TileType.Selected:
                 break;
+            case TileType.Road:
+                decay = 0;
+                onFire = false;
+                break;
             // add more here
             default:
                 break;
         }
+    }
+
+    public void depleteWater(){
+        capacity--;
+        if (capacity <= 0){
+            consumeTile();
+        }
+    }
+
+    public int getCapacity(){
+        return capacity;
     }
 
     public void highlightTile(bool highlight){
@@ -229,7 +254,8 @@ public class TileBehaviour : MonoBehaviour
         // extinguish a burning tile
         if (GetOnFire() || GetOnEmber()){
             // rename the tile from the enum variable
-            ChangeTileState(GetDefaultTile());
+            tile = TileType.Burned;
+            ChangeTileState(TileType.Burned);
             changeMaterial();
         }
     }
@@ -255,14 +281,17 @@ public class TileBehaviour : MonoBehaviour
         if (decay > 0){
            decay--; 
         }else{
-            Debug.Log("TILE IS CONSUMED");
-            burned = true;
-            gameObject.name = "Burned";
-            tile = TileType.Burned;
-            defaultTile = tile;
-            ChangeTileState(tile);
-            changeMaterial();
+            consumeTile();
         } 
+    }
+
+    public void consumeTile(){
+        burned = true;
+        gameObject.name = "Burned";
+        tile = TileType.Burned;
+        defaultTile = tile;
+        ChangeTileState(tile);
+        changeMaterial(); 
     }
 
     public void setToDirt(){
@@ -271,9 +300,19 @@ public class TileBehaviour : MonoBehaviour
         changeMaterial();
     }
 
+    public void applyFoam(int duration){
+        prevent = duration;
+    }
+
+    public void depleteFoam(){
+        prevent--;
+    }
+    public int getPrevent(){
+        return prevent;
+    }
 
     public bool CanOnFire(){
-        if (!onFire && decay > 0){
+        if (!onFire && decay > 0 && prevent <= 0){
         // if the tile isn't on fire, had fuel to begin with, and has fuel remaining 
             return true;
         }

@@ -23,6 +23,7 @@ public class UnitBehaviour : MonoBehaviour
     void Awake()
     {
         grid = transform.parent.GetComponent<Grid>();
+        water = capacity;
         setOriginPos();
     }
 
@@ -72,6 +73,6 @@ public class UnitBehaviour : MonoBehaviour
     }
 
     public void useWater(int water){
-    	this.water=- water;
+    	this.water = this.water - water;
     }
 }
