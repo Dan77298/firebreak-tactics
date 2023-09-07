@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class FireManager : MonoBehaviour
@@ -10,6 +11,8 @@ public class FireManager : MonoBehaviour
     [SerializeField] private TMP_Text Heat;
     [SerializeField] private TMP_Text Fire;
     [SerializeField] private TMP_Text UIN,UIE,UIS,UIW;
+    [SerializeField] public Image compassNeedle;
+    private bool isWindSame = false;
 
     private void Awake()
     {
@@ -38,24 +41,19 @@ public class FireManager : MonoBehaviour
             wind = choices[newDirection];
         }
 
-        UIN.color = new Color32(171,171,171,255);
-        UIE.color = new Color32(171,171,171,255);
-        UIS.color = new Color32(171,171,171,255);
-        UIW.color = new Color32(171,171,171,255);
-
-         // colour changer 
+         // compass needle changer
         switch (wind){
             case WindDirection.N:
-                UIN.color = new Color32(255,0,0,255);
+                compassNeedle.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 0f);
                 break;
             case WindDirection.W:
-                UIW.color = new Color32(255,0,0,255);
+                compassNeedle.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 90f);
                 break;
             case WindDirection.E:
-                UIE.color = new Color32(255,0,0,255);
+                compassNeedle.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 270f);
                 break;
             default: // S
-                UIS.color = new Color32(255,0,0,255);
+                compassNeedle.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 180f);
                 break;
         }
     }
@@ -96,5 +94,9 @@ public class FireManager : MonoBehaviour
             Fire.text = "FIRE " + tileManager.GetFireTiles().Count;
             GameManager.Instance.UpdateGameState(GameManager.GameState.PlayerTurn);
         }
+    }
+    
+    public WindDirection getWind() {
+        return wind;
     }
 }
