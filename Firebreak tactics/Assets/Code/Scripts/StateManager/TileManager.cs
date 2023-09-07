@@ -105,6 +105,13 @@ public class TileManager : MonoBehaviour
     public void SpreadFire(WindDirection wind){
         List<GameObject> igniteList = new List<GameObject>(); // prevents ignite piggybacking 
         int spreadRate = GetSpreadRate();
+        bool ember = false;
+        // roll a 5% chance to ember a tile
+        int emberChance = Random.Range(0, 100);
+        if (emberChance < 1000){
+            ember = true;
+            spreadRate = spreadRate - 1;
+        }
 
         if (fireTiles.Count > 0){
             // for all fires to be created
@@ -141,6 +148,77 @@ public class TileManager : MonoBehaviour
                 }
                 igniteList.Add(selected);
             }
+
+            // select a viable ember candidate and add it to the ignite list
+            if (ember){
+                List<GameObject> emberCandidates = new List<GameObject>();
+                List<GameObject> fireNeighbours = new List<GameObject>();
+                // create a list of all tiles that are one tile away from a fire tile and are not already on fire or touching a fire tile
+                // loop through all fire tiles and create a list of all their neighbours
+                foreach (GameObject fTile in fireTiles){
+                    // get the manager script of the fire tile
+                    TileBehaviour fScript = fTile.GetComponent<TileBehaviour>();
+                    // get the neighbours of the fire tile
+                    List<GameObject> fNeighbours = gridManager.getNeighbours(fScript.getCellPos());
+                    // add the neighbours of the fire tile to the list of fire neighbours
+                    fireNeighbours.AddRange(fireNeighbours);
+                foreach (GameObject nTile in fNeighbours){
+                    // get the manager script of the neighbour tile
+                    TileBehaviour nScript = nTile.GetComponent<TileBehaviour>();
+                    // get the neighbours of the neighbour tile
+                    List<GameObject> fnNeighbours = gridManager.getNeighbours(nScript.getCellPos());
+                    // loop through all neighbours of neighbours of fire tiles and check if they are ember candidates
+                    foreach (GameObject fnTile in fnNeighbours){
+                        // get the manager script of the neighbour of neighbour tile
+                        TileBehaviour fnScript = fnTile.GetComponent<TileBehaviour>();
+                        // get the neighbours of the neighbour of neighbour tile
+                        List<GameObject> emberNeighbours = gridManager.getNeighbours(fnScript.getCellPos());
+                        // set the ember candidate to true as a default
+                        bool emberCandidate = true;
+                        // check if a tile is a neighbour of a fire tile
+                        if (fireNeighbours.Contains(fnTile)){
+                            // if the tile is a neighbour of a fire tile, it is not an ember candidate
+                            emberCandidate = false;
+                            break;
+                        }
+                        // check if the tile is already on fire or cannot be set on fire
+                        if (fnScript.GetOnFire() || fnScript.CanOnFire() == false){
+                            // if the tile is already on fire or cannot be set on fire, it is not an ember candidate
+                            emberCandidate = false;
+                            break;
+                        }
+                        // check if any of the tiles neighbours are on fire or are already in the ignite list
+                        foreach (GameObject fnnTile in emberNeighbours){
+                            TileBehaviour fnnScript = fnnTile.GetComponent<TileBehaviour>();
+                            if (fnnScript.GetOnFire() || igniteList.Contains(fnnTile)){
+                                emberCandidate = false;
+                                break;
+                            }
+                        }
+                        
+                        if (emberCandidate){
+                            emberCandidates.Add(fnTile);
+                        }
+                    }
+                }
+                }
+                // log the positions of all ember candidates
+                foreach (GameObject emberTile in emberCandidates){
+                    Debug.Log("Ember candidate " + emberTile.name + " at " + emberTile.transform.position);
+                }
+
+                // select a random ember candidate and add it to the ignite list
+                if (emberCandidates.Count > 0){
+                    int randomIndex = Random.Range(0, emberCandidates.Count);
+                    GameObject emberTile = emberCandidates[randomIndex];
+                    igniteList.Add(emberTile);
+                    // Debug.Log("Embered tile " + emberTile.name);
+                    // log the position of the embered tile
+                    Debug.Log("Embered tile " + emberTile.name + " at " + emberTile.transform.position);
+                }
+            }
+
+            // ignite all tiles in the ignite list
             if (igniteList.Count > 0){
                 foreach (GameObject newFire in igniteList)
                 {
