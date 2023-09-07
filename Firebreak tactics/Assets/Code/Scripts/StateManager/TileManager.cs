@@ -33,7 +33,10 @@ public class TileManager : MonoBehaviour
     // all actions before the game gives the player their first turn
         if (_state == GameManager.GameState.ProduceTerrain)
         {
+            Debug.Log("ProduceTerrain");
             updateFireTiles();
+            gridManager.initializeGrid();
+            gridManager.updateNeighbourLookup();
             GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn);
         }
     }
@@ -59,7 +62,7 @@ public class TileManager : MonoBehaviour
         }
 
         foreach (GameObject tile in depleted){
-            Debug.Log("fire removed from list. Remaining: " + fireTiles.Count);
+            //Debug.Log("fire removed from list. Remaining: " + fireTiles.Count);
             fireTiles.Remove(tile);
         }
 

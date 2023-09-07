@@ -9,13 +9,6 @@ public class GridManager : MonoBehaviour
     public List<List<GameObject>> gridXZ = new List<List<GameObject>>();
     private Dictionary<GameObject, List<GameObject>> neighbourLookup = new Dictionary<GameObject, List<GameObject>>();
 
-
-    void Awake()
-    {
-        initializeGrid();
-        updateNeighbourLookup();
-    }
-
     public enum WindDirection{
         N, E, S, W
     }

@@ -31,12 +31,36 @@ public class PlayerController : MonoBehaviour
     {
         GameManager.OnGameStateChanged += GameStateChanged;
         Click.action.performed += HandleMouseDown;
+        Keyboard.action.started += HandleTabKeyDown;
+        Keyboard.action.canceled += HandleTabKeyUp;
     }
 
     private void OnDestroy()
     {
         GameManager.OnGameStateChanged -= GameStateChanged;
         Click.action.performed -= HandleMouseDown;
+        Keyboard.action.started -= HandleTabKeyDown;
+        Keyboard.action.canceled -= HandleTabKeyUp;
+    }
+
+    private void HandleTabKeyUp(InputAction.CallbackContext context)
+    {
+        // Check if the Tab key was released
+        if (context.control.name == "tab")
+        {
+            // Tab key was released
+            Debug.Log("Tab key up.");
+        }
+    }
+
+    private void HandleTabKeyDown(InputAction.CallbackContext context)
+    {
+        // Check if the Tab key was pressed down
+        if (context.control.name == "tab")
+        {
+            // Tab key was pressed down
+            Debug.Log("Tab key down.");
+        }
     }
 
     private void Update(){
@@ -44,6 +68,7 @@ public class PlayerController : MonoBehaviour
             handleMouseRelease();
         }
         checkCameraMovement();
+
 
         if (currentState == GameManager.GameState.PlayerTurn){
         // if it's the player's turn
@@ -54,6 +79,7 @@ public class PlayerController : MonoBehaviour
                 GameObject selected = hit.collider.gameObject;
                 TileBehaviour script = selected.GetComponent<TileBehaviour>();
                 if (Mouse.current.leftButton.ReadValue() == 1f && selectedTile){
+                    
                 // unit tracks mouse movement when mouse is down
                     dragUnit(unitManager.GetUnitOnTile(selectedTile));
                 }
@@ -105,25 +131,24 @@ public class PlayerController : MonoBehaviour
     }
 
     private void checkCameraMovement(){
-    // move camera based on mouse and keyboard input
-        Vector2 movementInput = Keyboard.action.ReadValue<Vector2>();
-        Vector3 cameraMovement = new Vector3(movementInput.x, 0f, movementInput.y);
-        cameraHolder.transform.Translate(cameraMovement * cameraMoveSpeed * Time.deltaTime);
-
         Vector2 mousePosition = Mouse.current.position.ReadValue();
         Vector2 screenSize = new Vector2(Screen.width, Screen.height);
 
-        if (mousePosition.x <= edgeScrollThreshold){
+        if (mousePosition.x <= edgeScrollThreshold)
+        {
             cameraHolder.transform.Translate(Vector3.left * cameraMoveSpeed * Time.deltaTime);
         }
-        else if (mousePosition.x >= screenSize.x - edgeScrollThreshold){
+        else if (mousePosition.x >= screenSize.x - edgeScrollThreshold)
+        {
             cameraHolder.transform.Translate(Vector3.right * cameraMoveSpeed * Time.deltaTime);
         }
 
-        if (mousePosition.y <= edgeScrollThreshold){
+        if (mousePosition.y <= edgeScrollThreshold)
+        {
             cameraHolder.transform.Translate(Vector3.back * cameraMoveSpeed * Time.deltaTime);
         }
-        else if (mousePosition.y >= screenSize.y - edgeScrollThreshold){
+        else if (mousePosition.y >= screenSize.y - edgeScrollThreshold)
+        {
             cameraHolder.transform.Translate(Vector3.forward * cameraMoveSpeed * Time.deltaTime);
         }
 
@@ -133,6 +158,7 @@ public class PlayerController : MonoBehaviour
 
         Camera.main.fieldOfView = Mathf.Clamp(Camera.main.fieldOfView - scrollWheel * zoomSpeed, minZoom, maxZoom);
     }
+
 
     private void dragUnit(GameObject unit){
     // make unit follow cursor 

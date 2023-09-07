@@ -10,10 +10,13 @@ public class UnitManager : MonoBehaviour
 
     private Dictionary<GameObject, GameObject> unitActions = new Dictionary<GameObject, GameObject>();
 
-    void Awake(){
-        // make a unit spawner function with a spawn tile 
+    void Awake(){ 
+        GameManager.OnGameStateChanged += GameStateChanged;
+    }
 
-        initializeUnitPositions();
+    void OnDestroy(){
+    // remove state listener when game is finished
+        GameManager.OnGameStateChanged -= GameStateChanged;
     }
 
     public Dictionary<GameObject, GameObject> getActions(){
@@ -188,7 +191,9 @@ public class UnitManager : MonoBehaviour
 
     private void GameStateChanged(GameManager.GameState newState){
     // reset unitActions at start of turn 
-        if (newState == GameManager.GameState.PlayerTurn){
+        Debug.Log(newState);
+        if (newState == GameManager.GameState.PreTurn){
+            initializeUnitPositions();
             unitActions.Clear();
         }
     }
