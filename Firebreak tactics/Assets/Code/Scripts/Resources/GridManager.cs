@@ -73,11 +73,20 @@ public class GridManager : MonoBehaviour
          
     }
 
+    public void PathfindingUnitTests()
+    {
+        
+    }
+
     //A star pathfinding impl
 
     //Example use of FindPath fucntion
     //List<Vector2Int> path = FindPath(gridXZ[2][3].GetComponent<TileBehaviour>(), gridXZ[4][4].GetComponent<TileBehaviour>());
-    public List<Vector2Int> FindPath(TileBehaviour startTile, TileBehaviour endTile)
+
+    //Unit type
+    //0 == ground
+    //1 == air
+    public List<Vector2Int> FindPath(TileBehaviour startTile, TileBehaviour endTile, int unitType)
     {
         List<TileBehaviour> toSearch = new List<TileBehaviour> () { startTile };
         List<TileBehaviour> processed = new List<TileBehaviour>();
@@ -125,16 +134,18 @@ public class GridManager : MonoBehaviour
 
                 TileBehaviour neighbour = obj.GetComponent<TileBehaviour>();
 
-                //solidity rules
-                //base on traversal rule?
-                if (neighbour.GetTraversalRule() == 4 || processed.Contains(neighbour))
+                //if tile is traversable
+                if (neighbour.GetTraversalRule() == 4 || processed.Contains(neighbour)
+                    || unitType == 0 && neighbour.GetTraversalRule() == 3
+                    || unitType == 1 && neighbour.GetTraversalRule() == 2
+                    )
                     continue;
 
                 bool inToSearch = toSearch.Contains(neighbour);
 
                 //1 is representative of distance cost
                 //replace with traversal cost of tile
-                float costToNeighbour = current.G + 1;
+                float costToNeighbour = current.G + 1 + current.GetTraversalCost();
 
                 //if not searched or a cheaper travel cost for neighbour has been found
                 if (!inToSearch || costToNeighbour < neighbour.G) 

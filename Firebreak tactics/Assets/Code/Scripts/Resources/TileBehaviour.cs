@@ -276,6 +276,11 @@ public class TileBehaviour : MonoBehaviour
         return this.traversalRule;
     }
 
+    public int GetTraversalCost()
+    {
+        return this.traversalCost;
+    }
+
     public int GetDistance(TileBehaviour target)
     {
         Vector3Int targetCoords = target.cellPos;
