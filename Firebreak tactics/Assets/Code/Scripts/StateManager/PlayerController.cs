@@ -31,6 +31,7 @@ public class PlayerController : MonoBehaviour
     private bool dragging = false;
     private string actionRejected = "";
     private Vector3 mouseStart;
+    private ControllerInput controllerInput;
 
     private bool moveAction = true;
     private List<Vector2Int> movePath = null;
@@ -41,50 +42,58 @@ public class PlayerController : MonoBehaviour
     private float moveTime = 1f;
     private float moveTimeElapsed = 0f;
 
+    private Vector2 camMoveVector;
+    private bool moveCam = false;
+
 
 
     private void Awake()
     {
+        controllerInput = new ControllerInput();
+        controllerInput.Enable();
+
         GameManager.OnGameStateChanged += GameStateChanged;
         Click.action.performed += HandleMouseDown;
-        Keyboard.action.started += HandleTabKeyDown;
-        Keyboard.action.canceled += HandleTabKeyUp;
+
+        controllerInput.Controls.Move.performed += OnMovementPerformed;
+        controllerInput.Controls.Move.canceled += OnMovementCanceled;
+
+
     }
 
     private void OnDestroy()
     {
+        controllerInput.Disable();
+
         GameManager.OnGameStateChanged -= GameStateChanged;
         Click.action.performed -= HandleMouseDown;
-        
-        Keyboard.action.started -= HandleTabKeyDown;
-        Keyboard.action.canceled -= HandleTabKeyUp;
+
+        controllerInput.Controls.Move.performed -= OnMovementPerformed;
+        controllerInput.Controls.Move.canceled -= OnMovementCanceled;
     }
 
-    private void HandleTabKeyUp(InputAction.CallbackContext context)
+    public void OnMovementPerformed(InputAction.CallbackContext value)
     {
-        // Check if the Tab key was released
-        if (context.control.name == "tab")
-        {
-            // Tab key was released
-            Debug.Log("Tab key up.");
-        }
+        //directional pressed
+        camMoveVector = value.ReadValue<Vector2>();
+        moveCam = true;
     }
 
-    private void HandleTabKeyDown(InputAction.CallbackContext context)
+    public void OnMovementCanceled(InputAction.CallbackContext value)
     {
-        // Check if the Tab key was pressed down
-        if (context.control.name == "tab")
-        {
-            // Tab key was pressed down
-            Debug.Log("Tab key down.");
-        }
+        //directional released
+        camMoveVector = Vector2.zero;
+        moveCam = false;
     }
+
+
 
     private void Update(){
         if (Mouse.current.leftButton.ReadValue() == 0f){
             handleMouseRelease();
         }
-        //checkCameraMovement();
+        
+        checkCameraMovement();
 
 
         if (movingUnit)
@@ -220,22 +229,29 @@ public class PlayerController : MonoBehaviour
         Vector2 mousePosition = Mouse.current.position.ReadValue();
         Vector2 screenSize = new Vector2(Screen.width, Screen.height);
 
-        if (mousePosition.x <= edgeScrollThreshold)
+        if (moveCam)
         {
-            cameraHolder.transform.Translate(Vector3.left * cameraMoveSpeed * Time.deltaTime);
+            cameraHolder.transform.Translate(new Vector3(camMoveVector.x, 0, camMoveVector.y) * cameraMoveSpeed * Time.deltaTime);
         }
-        else if (mousePosition.x >= screenSize.x - edgeScrollThreshold)
+        else
         {
-            cameraHolder.transform.Translate(Vector3.right * cameraMoveSpeed * Time.deltaTime);
-        }
+            if (mousePosition.x <= edgeScrollThreshold)
+            {
+                cameraHolder.transform.Translate(Vector3.left * cameraMoveSpeed * Time.deltaTime);
+            }
+            else if (mousePosition.x >= screenSize.x - edgeScrollThreshold)
+            {
+                cameraHolder.transform.Translate(Vector3.right * cameraMoveSpeed * Time.deltaTime);
+            }
 
-        if (mousePosition.y <= edgeScrollThreshold)
-        {
-            cameraHolder.transform.Translate(Vector3.back * cameraMoveSpeed * Time.deltaTime);
-        }
-        else if (mousePosition.y >= screenSize.y - edgeScrollThreshold)
-        {
-            cameraHolder.transform.Translate(Vector3.forward * cameraMoveSpeed * Time.deltaTime);
+            if (mousePosition.y <= edgeScrollThreshold)
+            {
+                cameraHolder.transform.Translate(Vector3.back * cameraMoveSpeed * Time.deltaTime);
+            }
+            else if (mousePosition.y >= screenSize.y - edgeScrollThreshold)
+            {
+                cameraHolder.transform.Translate(Vector3.forward * cameraMoveSpeed * Time.deltaTime);
+            }
         }
 
         // Zooming with the scroll wheel
