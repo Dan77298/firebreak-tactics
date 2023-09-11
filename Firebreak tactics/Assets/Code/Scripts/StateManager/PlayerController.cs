@@ -26,6 +26,9 @@ public class PlayerController : MonoBehaviour
     private string actionRejected = "";
     private Vector3 mouseStart;
 
+    private bool moveAction = true;
+
+
 
     private void Awake()
     {
@@ -39,6 +42,7 @@ public class PlayerController : MonoBehaviour
     {
         GameManager.OnGameStateChanged -= GameStateChanged;
         Click.action.performed -= HandleMouseDown;
+        
         Keyboard.action.started -= HandleTabKeyDown;
         Keyboard.action.canceled -= HandleTabKeyUp;
     }
@@ -78,11 +82,15 @@ public class PlayerController : MonoBehaviour
             // if player has their mouse over a tile
                 GameObject selected = hit.collider.gameObject;
                 TileBehaviour script = selected.GetComponent<TileBehaviour>();
-                if (Mouse.current.leftButton.ReadValue() == 1f && selectedTile){
-                    
-                // unit tracks mouse movement when mouse is down
+
+
+                if (Mouse.current.leftButton.ReadValue() == 1f && selectedTile)
+                {
+                    // unit tracks mouse movement when mouse is down
                     dragUnit(unitManager.GetUnitOnTile(selectedTile));
                 }
+
+
                 checkMouseOverTile(selected, script);
             }
             else{
@@ -98,34 +106,42 @@ public class PlayerController : MonoBehaviour
 
     private void checkMouseOverTile(GameObject selected, TileBehaviour script){
         if (selected != previousTile && belongsTo(selected, tiles.transform) && selected.name != "Fire"){
-        // new tile selected 
-            if (Mouse.current.leftButton.ReadValue() == 0f){
-            // LMB up
-                if (selected.GetComponent<TileBehaviour>().IsOccupied()){
-                // if the selected tile is occupied by a unit 
-                    script.highlightTile(true);                          
+            // new tile selected 
+            if (Mouse.current.leftButton.ReadValue() == 0f)
+            {
+                // LMB up
+                if (selected.GetComponent<TileBehaviour>().IsOccupied())
+                {
+                    // if the selected tile is occupied by a unit 
+                    script.highlightTile(true);
                 }
-                else{
-                    script.highlightTile(false); 
+                else
+                {
+                    script.highlightTile(false);
                 }
-                if (previousTile){
+                if (previousTile)
+                {
                     previousTile.GetComponent<TileBehaviour>().highlightTile(false);
-                }   
-                previousTile = selected;  
+                }
+                previousTile = selected;
             }
-            else if (Mouse.current.leftButton.ReadValue() == 1f && selectedTile){
-            // LMB down
+            else if (Mouse.current.leftButton.ReadValue() == 1f && selectedTile)
+            {
+                // LMB down
                 clickedUnit = null;
-                if (!selected.GetComponent<TileBehaviour>().IsOccupied()){
+                if (!selected.GetComponent<TileBehaviour>().IsOccupied())
+                {
                     script.selectTile(true);
                 }
-                else{
+                else
+                {
                     script.selectTile(false);
                 }
-                if (previousTile){
+                if (previousTile)
+                {
                     previousTile.GetComponent<TileBehaviour>().selectTile(false);
                 }
-                previousTile = selected; 
+                previousTile = selected;
             }
         }
     }
@@ -184,8 +200,8 @@ public class PlayerController : MonoBehaviour
     }
 
     private void HandleMouseDown(InputAction.CallbackContext context){
-    // fired when LMB down
-
+        // fired when left or right mouse button down
+        
         if (currentState == GameManager.GameState.PlayerTurn){
             if (context.action == Click.action){
                 ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
@@ -196,19 +212,31 @@ public class PlayerController : MonoBehaviour
                     downTile = hit.collider.gameObject;
 
                     if (Mouse.current.leftButton.ReadValue() == 1f){
-                    // LMB is down
+                        // LMB is down
                         if (belongsTo(downTile, tiles.transform)){
                         // tile is clicked
                             if (downTile.GetComponent<TileBehaviour>().IsOccupied()){
                             // selecting a unit
                                 Debug.Log("selectUnit"); 
                                 selectUnit(downTile);
+                                moveAction = false;
                             }
                         }  
                     }
                     else if (Mouse.current.rightButton.ReadValue() == 1f){
-                    // RMB is down
+                        // RMB is down
+                        
                         unitManager.requestCancel(downTile);
+
+                        if (belongsTo(downTile, tiles.transform)){
+                        // tile is clicked
+                            if (downTile.GetComponent<TileBehaviour>().IsOccupied()){
+                            // selecting a unit
+                                Debug.Log("selectUnit"); 
+                                selectUnit(downTile);
+                                moveAction = true;
+                            }
+                        } 
                     }  
                 }
             }
@@ -260,13 +288,24 @@ public class PlayerController : MonoBehaviour
         clickedUnit = null;
         upTile = null;
         downTile = null;
+        moveAction = false;
     }
 
     private void handleTileInteraction(){
     // determines action type
         TileBehaviour tileScript = upTile.GetComponent<TileBehaviour>();
         UnitBehaviour unitScript = clickedUnit.GetComponent<UnitBehaviour>();
-        if (upTile.name == "Fire"){
+
+        if (moveAction) 
+        {
+            
+            if (upTile.name != "Fire" && upTile.name != "Water")
+            {
+                unitManager.moveUnitToTile(clickedUnit, upTile);
+                CenterUnitToTile(clickedUnit, upTile);
+            }
+        }
+        else if (upTile.name == "Fire"){
         // fire tile
             if (unitScript.getWater() > 0){
             // if the unit has water 
