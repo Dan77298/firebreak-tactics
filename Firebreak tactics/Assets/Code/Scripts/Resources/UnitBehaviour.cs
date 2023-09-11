@@ -64,6 +64,15 @@ public class UnitBehaviour : MonoBehaviour
     	return water;
     }
 
+    public int getMovements(){
+        return movements;
+    }
+
+    public int getActions(){
+        return actions;
+    }
+
+
     public int getCapacity(){
     	return capacity;
     }
