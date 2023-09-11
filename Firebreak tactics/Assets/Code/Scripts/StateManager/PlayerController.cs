@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 
 using System.Collections;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float cameraMoveSpeed = 5f;
     [SerializeField] private GameObject cameraHolder;
     [SerializeField] private float edgeScrollThreshold = 20f;
+    [SerializeField] private Canvas UnitUI;
     [SerializeField] private float maxZoom = 60.0f;
     [SerializeField] private float minZoom = 20.0f;
 
@@ -82,7 +84,8 @@ public class PlayerController : MonoBehaviour
         if (Mouse.current.leftButton.ReadValue() == 0f){
             handleMouseRelease();
         }
-        checkCameraMovement();
+        //checkCameraMovement();
+
 
         if (movingUnit)
         {
@@ -147,6 +150,28 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void highlightUnit(TileBehaviour script, bool select){
+        script.highlightTile(select);
+        // change logic to fit the new display/highlight system 
+    }
+
+    private void displayUnitUI(bool active, GameObject unit){
+        RectTransform unitCanvas = UnitUI.GetComponent<RectTransform>();
+
+        if (unit){
+            UnitBehaviour unitScript = unit.GetComponent<UnitBehaviour>();
+            Transform water = UnitUI.transform.Find("water");
+            TMP_Text waterText = water.GetComponent<TMP_Text>(); // Get the Text component
+
+            if (waterText != null)
+            {
+                waterText.text = "[" +unitScript.getWater() + "/" + unitScript.getCapacity()+"]"; // Change the text content
+            }
+        }
+        unitCanvas.gameObject.SetActive(active);
+        unitCanvas.position = Input.mousePosition;
+    }
+
     private void checkMouseOverTile(GameObject selected, TileBehaviour script){
 
         if (movingUnit) return;
@@ -156,20 +181,19 @@ public class PlayerController : MonoBehaviour
             if (Mouse.current.leftButton.ReadValue() == 0f)
             {
                 // LMB up
-                if (selected.GetComponent<TileBehaviour>().IsOccupied())
-                {
-                    // if the selected tile is occupied by a unit 
-                    script.highlightTile(true);
+                if (selected.GetComponent<TileBehaviour>().IsOccupied()){
+                // if the selected tile is occupied by a unit 
+                    highlightUnit(script, true);
+                    displayUnitUI(true, selected.GetComponent<TileBehaviour>().GetOccupyingUnit());
                 }
-                else
-                {
-                    script.highlightTile(false);
+                else{
+                    highlightUnit(script, false);
+                    displayUnitUI(false, null);
                 }
-                if (previousTile)
-                {
+                if (previousTile){
                     previousTile.GetComponent<TileBehaviour>().highlightTile(false);
-                }
-                previousTile = selected;
+                }   
+                previousTile = selected;  
             }
             else if (Mouse.current.leftButton.ReadValue() == 1f && selectedTile)
             {
@@ -243,6 +267,9 @@ public class PlayerController : MonoBehaviour
 
             mouseStart = mousePosition3D;
         }
+
+
+        displayUnitUI(true, unit);
     }
 
     private void HandleMouseDown(InputAction.CallbackContext context){
