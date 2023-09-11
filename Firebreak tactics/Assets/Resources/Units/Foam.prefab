@@ -347,11 +347,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   range: 2
   movements: 3
+  maxMovements: 3
   actions: 2
   capacity: 6
   preventative: 1
   extinguish: 0
   support: 0
+  cellPos: {x: 0, y: 0, z: 0}
+  originPos: {x: 0, y: 0, z: 0}
 --- !u!1 &5838292783299392711
 GameObject:
   m_ObjectHideFlags: 0

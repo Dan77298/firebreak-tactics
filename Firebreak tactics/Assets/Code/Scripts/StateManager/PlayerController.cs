@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+using System.Collections;
+using System.Collections.Generic;
+
 public class PlayerController : MonoBehaviour
 {
     private bool hasControl = false;
@@ -8,6 +11,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Grid units;
     [SerializeField] private TileManager tileManager;
     [SerializeField] private UnitManager unitManager;
+    [SerializeField] private GridManager gridManager;
     [SerializeField] private InputActionReference Keyboard, Click;
     [SerializeField] private float cameraMoveSpeed = 5f;
     [SerializeField] private GameObject cameraHolder;
@@ -27,6 +31,13 @@ public class PlayerController : MonoBehaviour
     private Vector3 mouseStart;
 
     private bool moveAction = true;
+    private List<Vector2Int> movePath = null;
+    private bool movingUnit = false;
+    private GameObject unitToMove = null; //reference to clickedUnit when move made as
+                                          //clickedUnit sets to null as a bug outside of move update
+                                          //for unknown reasons
+    private float moveTime = 1f;
+    private float moveTimeElapsed = 0f;
 
 
 
@@ -73,8 +84,11 @@ public class PlayerController : MonoBehaviour
         }
         checkCameraMovement();
 
-
-        if (currentState == GameManager.GameState.PlayerTurn){
+        if (movingUnit)
+        {
+            MoveUnit();
+        }
+        else if (currentState == GameManager.GameState.PlayerTurn){
         // if it's the player's turn
             ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
             RaycastHit hit;
@@ -104,7 +118,39 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void MoveUnit()
+    {
+        moveTimeElapsed -= Time.deltaTime;
+
+        if (moveTimeElapsed < 0f)
+        {
+            //move to next tile
+            moveTimeElapsed = moveTime;
+
+            //travel path
+            GameObject nextTile = gridManager.getTile(new Vector3Int(
+                    movePath[0].x, movePath[0].y, 0));
+
+            print(movePath[0]);
+            //print(nextTile);
+            //print(unitToMove);
+
+            unitManager.moveUnitToTile(unitToMove, nextTile);
+            CenterUnitToTile(unitToMove, nextTile);
+
+            movePath.RemoveAt(0);
+
+            if (movePath.Count == 0)
+            {
+                movingUnit = false;
+            }
+        }
+    }
+
     private void checkMouseOverTile(GameObject selected, TileBehaviour script){
+
+        if (movingUnit) return;
+
         if (selected != previousTile && belongsTo(selected, tiles.transform) && selected.name != "Fire"){
             // new tile selected 
             if (Mouse.current.leftButton.ReadValue() == 0f)
@@ -261,7 +307,8 @@ public class PlayerController : MonoBehaviour
     }
         
     private void handleUnitInteraction(){
-    // unit to unit interaction
+
+        // unit to unit interaction
         GameObject unit = unitManager.GetUnitOnTile(upTile);
 
         if (clickedUnit.GetComponent<UnitBehaviour>().getSupport()){
@@ -301,8 +348,24 @@ public class PlayerController : MonoBehaviour
             
             if (upTile.name != "Fire" && upTile.name != "Water")
             {
-                unitManager.moveUnitToTile(clickedUnit, upTile);
-                CenterUnitToTile(clickedUnit, upTile);
+                //get distance
+                Vector3Int depPos = unitScript.getCellPos();
+                Vector3Int targetPos = tiles.WorldToCell(upTile.transform.position);
+
+                if (GetDistance(depPos, targetPos) <= unitScript.GetMovements())
+                {
+                    //find path
+                    GameObject depTile = gridManager.getTile(depPos);
+
+                    movePath = gridManager.FindPath(depTile.GetComponent<TileBehaviour>(),
+                        tileScript, unitScript.GetTraversalType());
+
+                    moveAction = false;
+                    movingUnit = true;
+                    unitToMove = clickedUnit;
+                    return;
+                }
+                
             }
         }
         else if (upTile.name == "Fire"){
@@ -396,5 +459,14 @@ public class PlayerController : MonoBehaviour
                 }
     }
         }
+    }
+
+    public int GetDistance(Vector3Int dep, Vector3Int target)
+    {
+        return Mathf.Max(
+                Mathf.Abs(target.y - dep.y),
+                Mathf.Abs(target.y - dep.y),
+                Mathf.Abs(target.y - dep.y)
+            );
     }
 }

@@ -24065,6 +24065,7 @@ MonoBehaviour:
   units: {fileID: 503287533}
   tileManager: {fileID: 1519993928}
   unitManager: {fileID: 1519993932}
+  gridManager: {fileID: 1519993931}
   Keyboard: {fileID: -847750561525775080, guid: c8025fb86715c2d4da098053845fcce1, type: 3}
   Click: {fileID: -1063638255705462512, guid: c8025fb86715c2d4da098053845fcce1, type: 3}
   cameraMoveSpeed: 7

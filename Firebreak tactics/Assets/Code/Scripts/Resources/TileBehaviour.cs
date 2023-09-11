@@ -17,7 +17,7 @@ public class TileBehaviour : MonoBehaviour
     private bool hasEmbered = false; // has the tile used its ember state 
     private int prevent = 0; // how many turns of preventative the tile has 
     private int capacity = 0; // for water tiles 
-    [SerializeField] private Vector3Int cellPos;
+    [SerializeField] public Vector3Int cellPos;
 
     private Material tileMaterial; // the tile's default material 
     private Material displayMaterial; // the tile's displayed material 

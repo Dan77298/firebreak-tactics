@@ -7,13 +7,18 @@ public class UnitBehaviour : MonoBehaviour
     // Start is called before the first frame update
     [SerializeField] private int range; // how many tiles away an action can be made 
     [SerializeField] private int movements; // how many tiles the unit can move before making an action
+    [SerializeField] private int maxMovements; // how many tiles the unit can move before making an action
     [SerializeField] private int actions; // how many actions the unit can make
     [SerializeField] private int capacity; // how many actions the unit can make before needing to replenish
     [SerializeField] private bool preventative; // unit can disable tiles
     [SerializeField] private bool extinguish; // unit can put out fires
     [SerializeField] private bool support; // unit can replenish other units 
 
-   	[SerializeField] private Vector3Int cellPos;
+    [SerializeField] private int traversalType; //the type of unit encoded as an int
+                                                //0 == ground
+                                                //1 == air
+
+    [SerializeField] private Vector3Int cellPos;
    	[SerializeField] private Vector3Int originPos; // position before the end of turn
 
     private int water;
@@ -74,5 +79,25 @@ public class UnitBehaviour : MonoBehaviour
 
     public void useWater(int water){
     	this.water = this.water - water;
+    }
+
+    public void ResetMovements() 
+    {
+        movements = maxMovements;
+    }
+
+    public void SetMovements(int input) 
+    {
+        movements = input;
+    }
+
+    public int GetMovements()
+    {
+        return movements;
+    }
+
+    public int GetTraversalType()
+    {
+        return traversalType;
     }
 }
