@@ -5,7 +5,14 @@ using UnityEngine;
 public class TileManager : MonoBehaviour
 {
     [SerializeField] public Grid boardGrid;
-    [SerializeField] private GridManager gridManager; 
+    [SerializeField] private GridManager gridManager;
+    
+    private int burnt = 0;
+    private int fire = 0;
+    private int forest1 = 0;
+    private int forest2 = 0;
+    private int forest3 = 0;
+    private int water = 0; 
 
     private List<GameObject> fireTiles;
     private List<GameObject> nextFireTiles;
@@ -36,6 +43,8 @@ public class TileManager : MonoBehaviour
             SetTiles();
             GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn);
         }
+        
+        countTiles();
     }
 
     public void SetTiles()
@@ -235,4 +244,64 @@ public class TileManager : MonoBehaviour
     }
     return neighbours;
 }
+
+private void countTiles()
+{   
+    burnt = 0;
+    fire = 0;
+    forest1 = 0;
+    forest2 = 0;
+    forest3 = 0;
+    water = 0;
+    
+    foreach (Transform child in boardGrid.transform) {
+        string name = child.gameObject.name;
+        
+        if (name == "Grass3") {
+            forest3++;
+        } else if (name == "Grass2") {
+            forest2++;
+        } else if (name == "Grass1") {
+            forest1++;
+        } else if (name == "Water") {
+            water++;
+        } else if (name == "Burned") {
+            burnt++;
+        } else if (name == "Fire") {
+            fire++;
+        }
+    }
+}
+
+// Getter methods for tile variables
+
+    public int GetBurnt()
+    {
+        return burnt;
+    }
+
+    public int GetFire()
+    {
+        return fire;
+    }
+
+    public int GetForest1()
+    {
+        return forest1;
+    }
+
+    public int GetForest2()
+    {
+        return forest2;
+    }
+
+    public int GetForest3()
+    {
+        return forest3;
+    }
+
+    public int GetWater()
+    {
+        return water;
+    }
 }

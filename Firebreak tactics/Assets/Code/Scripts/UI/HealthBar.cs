@@ -36,22 +36,22 @@ public class HealthBar : MonoBehaviour
     }
 
     private void GameStateChanged(GameManager.GameState _state){
-        float burntBarSize = calculateBarSize(burntTiles);
+        float burntBarSize = calculateBarSize(tileManager.GetBurnt());
         changeImageSize(burntBar, new Vector2(burntBarSize, 30f));
         
-        float fireBarSize = calculateBarSize(tileManager.GetFireTiles().Count);
+        float fireBarSize = calculateBarSize(tileManager.GetFire());
         changeImageSize(fireBar, new Vector2(fireBarSize, 30f));
         
-        float forest1BarSize = calculateBarSize(forest1Tiles);
+        float forest1BarSize = calculateBarSize(tileManager.GetForest1());
         changeImageSize(forest1Bar, new Vector2(forest1BarSize, 30f));
         
-        float forest2BarSize = calculateBarSize(forest2Tiles);
+        float forest2BarSize = calculateBarSize(tileManager.GetForest2());
         changeImageSize(forest2Bar, new Vector2(forest2BarSize, 30f));
         
-        float forest3BarSize = calculateBarSize(forest3Tiles);
+        float forest3BarSize = calculateBarSize(tileManager.GetForest3());
         changeImageSize(forest3Bar, new Vector2(forest3BarSize, 30f));
         
-        float waterBarSize = calculateBarSize(waterTiles);
+        float waterBarSize = calculateBarSize(tileManager.GetWater());
         changeImageSize(waterBar, new Vector2(waterBarSize, 30f));
     }
     
