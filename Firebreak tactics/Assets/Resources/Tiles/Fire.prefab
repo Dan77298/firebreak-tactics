@@ -100,6 +100,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   materialChanger: {fileID: -6957826938351373244}
   tile: 4
+  cellPos: {x: 0, y: 0, z: 0}
+  tileMaterial: {fileID: 2100000, guid: 060be961096fcc6419d2fbdeb67caf09, type: 2}
+  highlightedMaterial: {fileID: 2100000, guid: 03843e606033e66469c0ebc7a8931ddd, type: 2}
+  selectedMaterial: {fileID: 2100000, guid: cbdd26a956e37434d8e5b78b3a694c59, type: 2}
+  borderPrefab: {fileID: 6675104577715339971, guid: f51ad74a4ee1d4444ae942349159594f, type: 3}
 --- !u!114 &-6957826938351373244
 MonoBehaviour:
   m_ObjectHideFlags: 0

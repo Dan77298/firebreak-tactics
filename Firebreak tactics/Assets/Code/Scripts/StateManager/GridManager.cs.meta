@@ -3,7 +3,9 @@ guid: 7deec20fc907e7341856d800a0e8fa39
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - grid: {instanceID: 0}
+  - borderPrefab: {fileID: 871790212694128564, guid: 089ef3edbed6dc5418276e8a2402aaa6, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
