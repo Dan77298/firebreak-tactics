@@ -4,6 +4,7 @@ using TMPro;
 
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 public class PlayerController : MonoBehaviour
 {
@@ -33,7 +34,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 mouseStart;
     private ControllerInput controllerInput;
 
-    private bool moveAction = true;
+    private bool moveAction = false;
     private List<Vector2Int> movePath = null;
     private bool movingUnit = false;
     private GameObject unitToMove = null; //reference to clickedUnit when move made as
@@ -113,7 +114,8 @@ public class PlayerController : MonoBehaviour
                 if (Mouse.current.leftButton.ReadValue() == 1f && selectedTile)
                 {
                     // unit tracks mouse movement when mouse is down
-                    dragUnit(unitManager.GetUnitOnTile(selectedTile));
+                    if (script.IsOccupied())
+                        dragUnit(unitManager.GetUnitOnTile(selectedTile));
                 }
 
 
@@ -122,8 +124,9 @@ public class PlayerController : MonoBehaviour
             else{
             // no selected tile 
                 if (previousTile){
-                // if the selected tile is occupied by a unit 
-                    previousTile.GetComponent<TileBehaviour>().highlightTile(false);
+                    // if the selected tile is occupied by a unit 
+                    if (previousTile.GetComponent<TileBehaviour>().IsOccupied())
+                        previousTile.GetComponent<TileBehaviour>().highlightTile(false);
                 }
                 previousTile = null;
             }    
@@ -143,7 +146,7 @@ public class PlayerController : MonoBehaviour
             GameObject nextTile = gridManager.getTile(new Vector3Int(
                     movePath[0].x, movePath[0].y, 0));
 
-            print(movePath[0]);
+            //print(movePath[0]);
             //print(nextTile);
             //print(unitToMove);
 
@@ -162,6 +165,79 @@ public class PlayerController : MonoBehaviour
     private void highlightUnit(TileBehaviour script, bool select){
         script.highlightTile(select);
         // change logic to fit the new display/highlight system 
+    }
+
+    private void highlightMovementTiles(TileBehaviour origin, int range, bool show)
+    {
+
+        List<TileBehaviour> processed = new List<TileBehaviour>();
+        List<TileBehaviour> toSearch = new List<TileBehaviour>();
+        List<TileBehaviour> toAdd = new List<TileBehaviour>();
+        int distance = -1;
+
+        //y odd
+        (int, int)[] oddneighbourRelativeCoords = new (int, int)[] { (-1, 0), (0, 1), (0, -1), (1, 1), (1, 0), (1, -1) };
+
+        //y even
+        (int, int)[] evenNeighbourRelativeCoords = new (int, int)[] { (-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 0), (0, -1) };
+
+        (int, int)[] relCoords;
+
+        toSearch.Add(origin);
+
+        while (toSearch.Count > 0)
+        {
+            distance++;
+
+            if (distance > range)
+                break;
+
+            foreach (TileBehaviour tileBehaviour in toSearch)
+            {
+                Vector3Int currentPos = tileBehaviour.getCellPos();
+
+                if (tileBehaviour != origin)
+                    tileBehaviour.highlightTile(show);
+                
+
+                processed.Add(tileBehaviour);
+
+                //add neighbours to tosearch
+                if (currentPos.y % 2 == 0)
+                    relCoords = evenNeighbourRelativeCoords;
+                else relCoords = oddneighbourRelativeCoords;
+
+                foreach ((int, int) coord in relCoords)
+                {
+
+                    GameObject candidateGO = gridManager.getTile(
+                            new Vector3Int(currentPos.x + coord.Item1, currentPos.y + coord.Item2, 0)
+                        );
+
+
+                    if (candidateGO != null)
+                    {
+                        TileBehaviour candidate = candidateGO.GetComponent<TileBehaviour>();
+
+                        if (!processed.Contains(candidate) &&
+                            !toSearch.Contains(candidate) && !toAdd.Contains(candidate))
+                        {
+                            //rule check
+                            if (candidate.GetTraversalRule() == 1 || candidate.GetTraversalRule() == 2)
+                                toAdd.Add(candidate);
+                        }
+                    }
+                }
+            }
+
+            toSearch.Clear();
+
+            foreach (TileBehaviour tileBehaviour in toAdd)
+                toSearch.Add(tileBehaviour);
+
+            toAdd.Clear();
+
+        }
     }
 
     private void displayUnitUI(bool active, GameObject unit){
@@ -210,11 +286,13 @@ public class PlayerController : MonoBehaviour
                     displayUnitUI(true, selected.GetComponent<TileBehaviour>().GetOccupyingUnit());
                 }
                 else{
-                    highlightUnit(script, false);
+                    //highlightUnit(script, false);
                     displayUnitUI(false, null);
                 }
                 if (previousTile){
-                    previousTile.GetComponent<TileBehaviour>().highlightTile(false);
+                    if (previousTile.GetComponent<TileBehaviour>().IsOccupied())
+                        previousTile.GetComponent<TileBehaviour>().highlightTile(false);
+                        
                 }   
                 previousTile = selected;  
             }
@@ -322,7 +400,6 @@ public class PlayerController : MonoBehaviour
                             // selecting a unit
                                 Debug.Log("selectUnit"); 
                                 selectUnit(downTile);
-                                moveAction = false;
                             }
                         }  
                     }
@@ -333,11 +410,17 @@ public class PlayerController : MonoBehaviour
 
                         if (belongsTo(downTile, tiles.transform)){
                         // tile is clicked
-                            if (downTile.GetComponent<TileBehaviour>().IsOccupied()){
+                            if (!moveAction && !movingUnit && downTile.GetComponent<TileBehaviour>().IsOccupied()){
                             // selecting a unit
                                 Debug.Log("selectUnit"); 
                                 selectUnit(downTile);
                                 moveAction = true;
+
+
+                                highlightMovementTiles(downTile.GetComponent<TileBehaviour>(),
+                                    unitManager.GetUnitOnTile(downTile).GetComponent<UnitBehaviour>().GetMaxMovements(), 
+                                    true);
+
                             }
                         } 
                     }  
@@ -420,6 +503,9 @@ public class PlayerController : MonoBehaviour
                     moveAction = false;
                     movingUnit = true;
                     unitToMove = clickedUnit;
+
+                    highlightMovementTiles(depTile.GetComponent<TileBehaviour>(), unitScript.GetMaxMovements(), false);
+
                     return;
                 }
                 
@@ -474,7 +560,7 @@ public class PlayerController : MonoBehaviour
     }
 
     private void dropUnit(){
-    // drop the unit on the tile 
+        // drop the unit on the tile
 
         GameObject unit = unitManager.GetUnitOnTile(downTile);
         unitManager.moveUnitToTile(unit, upTile);

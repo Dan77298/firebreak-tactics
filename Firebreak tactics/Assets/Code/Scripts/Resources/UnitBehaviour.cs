@@ -95,6 +95,11 @@ public class UnitBehaviour : MonoBehaviour
         movements = maxMovements;
     }
 
+    public int GetMaxMovements()
+    {
+        return maxMovements;
+    }
+
     public void SetMovements(int input) 
     {
         movements = input;
