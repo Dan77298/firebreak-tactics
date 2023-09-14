@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class GridManager : MonoBehaviour
 {
     [SerializeField] public Grid grid;
 
     public List<List<GameObject>> gridXZ = new List<List<GameObject>>();
+    public List<GameObject> FogTiles = new List<GameObject>();
     private Dictionary<GameObject, List<GameObject>> neighbourLookup = new Dictionary<GameObject, List<GameObject>>();
 
 
@@ -76,6 +78,25 @@ public class GridManager : MonoBehaviour
         //             print("gameObj " + gridXZ[x][y].name);
         //     }
         // }
+        
+
+
+        // Create all of the fog of war tiles in the positions of all of the tiles and add them to a list
+        foreach (Transform child in grid.transform)
+        {
+            //if tile
+            // if (child.tag == "Tile" || child.tag == "Water" || child.tag == "Fire")
+            if (child.tag == "Tile")
+            {
+                Vector3Int cellPos = child.GetComponent<TileBehaviour>().cellPos;
+                Vector3 worldPos = grid.GetCellCenterWorld(cellPos);
+                GameObject fogTile = Instantiate(Resources.Load("Tiles/Fog1"), worldPos, Quaternion.identity) as GameObject;
+                // set the rotation of the fog tile to match the tile
+                fogTile.transform.rotation = child.transform.rotation;
+                fogTile.transform.parent = child;
+                FogTiles.Add(fogTile);
+            }
+        }
     }
 
     public void updateNeighbourLookup(){

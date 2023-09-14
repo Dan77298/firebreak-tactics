@@ -39,7 +39,8 @@ public class TileBehaviour : MonoBehaviour
         Fire,
         Water,
         Ember,
-        Burned
+        Burned,
+        Fog
     }
 
     private void Awake(){
@@ -127,6 +128,12 @@ public class TileBehaviour : MonoBehaviour
                 break;
             case TileType.Fire:
                 onFire = true;
+                // destroy the child fog tile
+                foreach (Transform child in transform){
+                    if (child.tag == "Fog"){
+                        Destroy(child.gameObject);
+                    }
+                }
                 break;
             case TileType.Ember:
                 onEmber = true;
