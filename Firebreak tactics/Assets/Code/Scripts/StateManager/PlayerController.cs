@@ -170,11 +170,25 @@ public class PlayerController : MonoBehaviour
         if (unit){
             UnitBehaviour unitScript = unit.GetComponent<UnitBehaviour>();
             Transform water = UnitUI.transform.Find("water");
-            TMP_Text waterText = water.GetComponent<TMP_Text>(); // Get the Text component
+            Transform movement  = UnitUI.transform.Find("movement");
+            Transform actions  = UnitUI.transform.Find("actions");
+            TMP_Text waterText = water.GetComponent<TMP_Text>();
+            TMP_Text movementText = movement.GetComponent<TMP_Text>(); 
+            TMP_Text actionsText = actions.GetComponent<TMP_Text>(); 
 
             if (waterText != null)
             {
-                waterText.text = "[" +unitScript.getWater() + "/" + unitScript.getCapacity()+"]"; // Change the text content
+                waterText.text = "water: [" +unitScript.getWater() + "/" + unitScript.getCapacity()+"]";
+            }
+
+            if (movementText != null)
+            {
+                movementText.text = "movements: " +unitScript.getMovements();
+            }
+
+            if (actionsText != null)
+            {
+                actionsText.text = "actions: " +unitScript.getActions();
             }
         }
         unitCanvas.gameObject.SetActive(active);
