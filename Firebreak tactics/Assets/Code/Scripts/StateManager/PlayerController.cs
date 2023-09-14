@@ -504,7 +504,10 @@ public class PlayerController : MonoBehaviour
                     movingUnit = true;
                     unitToMove = clickedUnit;
 
-                    highlightMovementTiles(depTile.GetComponent<TileBehaviour>(), unitScript.GetMaxMovements(), false);
+                    highlightMovementTiles(depTile.GetComponent<TileBehaviour>(), unitScript.GetMovements(), false);
+
+                    unitScript.SetMovements(unitScript.GetMovements() -
+                        depTile.GetComponent<TileBehaviour>().GetDistance(tileScript));
 
                     return;
                 }

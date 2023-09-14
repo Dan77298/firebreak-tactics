@@ -192,9 +192,29 @@ public class UnitManager : MonoBehaviour
     private void GameStateChanged(GameManager.GameState newState){
     // reset unitActions at start of turn 
         Debug.Log(newState);
-        if (newState == GameManager.GameState.PreTurn){
+        if (newState == GameManager.GameState.PreTurn)
+        {
             initializeUnitPositions();
             unitActions.Clear();
+        }
+        else if (newState == GameManager.GameState.PlayerTurn)
+        {
+            //reset all unit movement, actions, etc.
+            ResetUnitStats();
+        }
+    }
+
+    public void ResetUnitStats()
+    {
+        foreach (Transform unitTransform in unitsGrid.transform)
+        {
+            // for all units       
+            if (unitTransform.tag == "Unit")
+            {
+                UnitBehaviour unit = unitTransform.gameObject.GetComponent<UnitBehaviour>();
+
+                unit.SetMovements(unit.GetMaxMovements());
+            }
         }
     }
 }
