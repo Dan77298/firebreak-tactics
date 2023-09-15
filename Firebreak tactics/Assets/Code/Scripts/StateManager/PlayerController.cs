@@ -418,7 +418,7 @@ public class PlayerController : MonoBehaviour
 
 
                                 highlightMovementTiles(downTile.GetComponent<TileBehaviour>(),
-                                    unitManager.GetUnitOnTile(downTile).GetComponent<UnitBehaviour>().GetMaxMovements(), 
+                                    unitManager.GetUnitOnTile(downTile).GetComponent<UnitBehaviour>().GetMovements(), 
                                     true);
 
                             }
