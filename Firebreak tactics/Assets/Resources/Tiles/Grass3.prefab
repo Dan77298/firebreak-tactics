@@ -79,6 +79,20 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7243322351476439463, guid: 6823baaa797ab7549ba233fe1f43ec8b, type: 3}
   m_PrefabInstance: {fileID: 6166294402157523073}
   m_PrefabAsset: {fileID: 0}
+--- !u!64 &-4594322914474762387
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3537128201450047782}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -4575734979276873811, guid: 800e03d16de782e498e80688f443b10a, type: 3}
 --- !u!114 &-4246888787659010571
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -107,17 +121,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   materialChanger: {fileID: -4246888787659010571}
   tile: 2
---- !u!64 &-4594322914474762387
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3537128201450047782}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -4575734979276873811, guid: 800e03d16de782e498e80688f443b10a, type: 3}
+  cellPos: {x: 0, y: 0, z: 0}
+  tileMaterial: {fileID: 2100000, guid: d424417ab387fff4cb71992806ca7116, type: 2}
+  highlightedMaterial: {fileID: 2100000, guid: 03843e606033e66469c0ebc7a8931ddd, type: 2}
+  selectedMaterial: {fileID: 2100000, guid: cbdd26a956e37434d8e5b78b3a694c59, type: 2}
+  borderPrefab: {fileID: 6675104577715339971, guid: f51ad74a4ee1d4444ae942349159594f, type: 3}

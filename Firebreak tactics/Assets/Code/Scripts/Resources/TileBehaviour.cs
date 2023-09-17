@@ -19,8 +19,14 @@ public class TileBehaviour : MonoBehaviour
     private int capacity = 0; // for water tiles 
     [SerializeField] public Vector3Int cellPos;
 
-    private Material tileMaterial; // the tile's default material 
+    [SerializeField] private Material tileMaterial; // the tile's default material 
     private Material displayMaterial; // the tile's displayed material 
+    [SerializeField] private Material highlightedMaterial;
+    [SerializeField] private Material selectedMaterial;
+
+    [SerializeField] public GameObject borderPrefab;
+    private GameObject borderInstance;
+
 
     // tile traversal
     private int altitude = 1; // [1]low, [2]medium, [3]high 
@@ -64,6 +70,18 @@ public class TileBehaviour : MonoBehaviour
         grid = transform.parent.GetComponent<Grid>();
         cellPos = grid.WorldToCell(new Vector3(transform.position.x, 0, transform.position.z));
 
+        if (borderPrefab != null)
+        {
+            Debug.Log("border prefab instantiated");
+            borderInstance = Instantiate(borderPrefab);
+            borderInstance.transform.SetParent(this.transform, false);
+            borderInstance.transform.position = this.transform.position + new Vector3(0, 0.2f, 0);  // Adjust position if necessary.            
+            Vector3 tileSize = this.GetComponent<Renderer>().bounds.size;  // Get the size of the tile
+            float hexExpectedHeight = Mathf.Sqrt(3) * tileSize.x / 2; // Calculate the expected height of the hexagon based on its width
+            borderInstance.transform.localScale = new Vector3(tileSize.x, borderInstance.transform.localScale.y, hexExpectedHeight); // Scale the borderInstance
+
+            borderInstance.GetComponent<Renderer>().enabled = false;
+        }
     }
 
     private void SetDefaultState(TileType _tile){
@@ -193,25 +211,53 @@ public class TileBehaviour : MonoBehaviour
     }
 
     public void highlightTile(bool highlight){
-    // sets highlighted on a tile
-        if (highlight){
-            tile = TileType.Highlighted; 
+        // sets highlighted on a tile
+        if (highlight)
+        {
+
+            if (borderInstance != null)
+            {
+                // Change Material
+                borderInstance.GetComponent<Renderer>().material = highlightedMaterial;
+                // Enable Border
+                borderInstance.GetComponent<Renderer>().enabled = true;
+
+            }
+
         }
-        else{
-            tile = GetDefaultTile(); 
+        else
+        {
+            if (borderInstance != null)
+            {
+                // Disable Border
+                borderInstance.GetComponent<Renderer>().enabled = false;
+            }
         }
-        changeMaterial();
+       
     }
 
     public void selectTile(bool select){
-    // sets highlighted on a tile
+        // sets selected on a tile
+        
         if (select){
-            tile = TileType.Selected; 
+            
+            if(borderInstance != null)
+            {
+                // Change Material
+                borderInstance.GetComponent<Renderer>().material = selectedMaterial;
+                // Enable Border
+                borderInstance.GetComponent<Renderer>().enabled = true;
+                
+            }
+            
         }
         else{
-            tile = GetDefaultTile(); 
-        }
-        changeMaterial();
+            if (borderInstance != null)
+            {
+                // Disable Border
+                borderInstance.GetComponent<Renderer>().enabled = false;
+            }
+        }        
     }
 
     public bool IsOccupied(){
