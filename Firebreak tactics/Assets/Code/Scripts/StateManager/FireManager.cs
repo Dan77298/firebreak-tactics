@@ -137,8 +137,10 @@ public class FireManager : MonoBehaviour
             if (tileScript != null){
                 if (tileScript.getPrevent() > 0){
                     tileScript.depleteFoam();
+                    tileScript.foamTile(true);
                 }
                 else{
+                    tileScript.foamTile(false);
                     depleted.Add(tile);
                 }
             }

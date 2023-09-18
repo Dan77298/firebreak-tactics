@@ -23,6 +23,7 @@ public class TileBehaviour : MonoBehaviour
     private Material displayMaterial; // the tile's displayed material 
     [SerializeField] private Material highlightedMaterial;
     [SerializeField] private Material selectedMaterial;
+    [SerializeField] private Material foamMaterial; // for foam tiles
 
     [SerializeField] public GameObject borderPrefab;
     [SerializeField] private bool unitBase = false; // the unit spawner tile 
@@ -73,7 +74,6 @@ public class TileBehaviour : MonoBehaviour
 
         if (borderPrefab != null)
         {
-            Debug.Log("border prefab instantiated");
             borderInstance = Instantiate(borderPrefab);
             borderInstance.transform.SetParent(this.transform, false);
             borderInstance.transform.position = this.transform.position + new Vector3(0, 0.2f, 0);  // Adjust position if necessary.            
@@ -211,6 +211,7 @@ public class TileBehaviour : MonoBehaviour
         return capacity;
     }
 
+    //Enable the border prefab to indicate the tile has been highlighted
     public void highlightTile(bool highlight){
         // sets highlighted on a tile
         if (highlight)
@@ -237,6 +238,7 @@ public class TileBehaviour : MonoBehaviour
        
     }
 
+    // Enable the border prefab to indicate the tile has been selected
     public void selectTile(bool select){
         // sets selected on a tile
         
@@ -259,6 +261,28 @@ public class TileBehaviour : MonoBehaviour
                 borderInstance.GetComponent<Renderer>().enabled = false;
             }
         }        
+    }
+
+    // Enable the border prefab to indicate the tile has been foamed
+    public void foamTile(bool foam)
+    {
+        Debug.Log("foamTile called");
+        if (foam)
+        {
+            Debug.Log("BorderInstance: "+ borderInstance);
+            if (borderInstance != null)
+            {
+                // Change Material
+                borderInstance.GetComponent<Renderer>().material = foamMaterial;
+                // Enable Border
+                borderInstance.GetComponent<Renderer>().enabled = true;
+
+            }
+        } else
+        {
+            // Disable Border
+            borderInstance.GetComponent<Renderer>().enabled = false;
+        }
     }
 
     public bool isBaseTile(){

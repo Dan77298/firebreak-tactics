@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: highlighted
+  m_Name: Foam
   m_Shader: {fileID: 4800000, guid: 23acd1075e8b7bb4ca66ffc69661cee9, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -62,6 +62,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _BorderThickness: 0.005
+    - _BorderWidth: 0
     - _Brightness: 0.32
     - _BumpScale: 1
     - _Cutoff: 0.5
@@ -82,7 +84,8 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.6792453, g: 0.6792453, b: 0.6792453, a: 1}
+    - _BorderColor: {r: 0.050980397, g: 0.050980397, b: 0.050980397, a: 1}
+    - _Color: {r: 0.39417946, g: 0.79447013, b: 0.8113208, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _SpecularColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
