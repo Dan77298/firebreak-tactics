@@ -10,7 +10,7 @@ public class TileBehaviour : MonoBehaviour
     // tile states
     [SerializeField] private TileType tile; // what type of tile is it
     private TileType defaultTile; // what type of tile was it originally 
-    private GameObject occupyingUnit = null;
+    [SerializeField] private GameObject occupyingUnit = null;
     private bool onFire = false; // is the tile burning
     private bool onEmber = false; // is the tile embering 
     private bool burned = false; // is the tile fully depleted naturally 

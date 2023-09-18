@@ -347,7 +347,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   range: 3
   movements: 4
-  maxMovements: 0
+  maxMovements: 4
   actions: 2
   capacity: 6
   preventative: 1
