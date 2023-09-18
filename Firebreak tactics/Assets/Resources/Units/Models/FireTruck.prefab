@@ -305,7 +305,7 @@ GameObject:
   - component: {fileID: 8002996104960648883}
   m_Layer: 0
   m_Name: FireTruck
-  m_TagString: Untagged
+  m_TagString: Unit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -347,9 +347,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   range: 0
   movements: 0
+  maxMovements: 0
   actions: 0
-  extinguish: 0
+  capacity: 0
   preventative: 0
+  extinguish: 0
+  support: 0
+  traversalType: 0
+  cellPos: {x: 0, y: 0, z: 0}
+  originPos: {x: 0, y: 0, z: 0}
 --- !u!1 &5838292783299392711
 GameObject:
   m_ObjectHideFlags: 0

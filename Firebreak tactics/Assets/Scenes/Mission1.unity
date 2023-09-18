@@ -38716,10 +38716,10 @@ MonoBehaviour:
   gridManager: {fileID: 1519993931}
   unitManager: {fileID: 1519993932}
   unitGrid: {fileID: 503287533}
-  foamPrefab: {fileID: 3388760899423097095, guid: 70dcf9e5cbdbcb040b6ccaf8b505f816, type: 3}
-  scoutPrefab: {fileID: 5715801831983984845, guid: 94b117ff0276c654ea45857881205949, type: 3}
+  foamPrefab: {fileID: 7125581571502103240, guid: 70dcf9e5cbdbcb040b6ccaf8b505f816, type: 3}
+  scoutPrefab: {fileID: 679315220651669264, guid: 94b117ff0276c654ea45857881205949, type: 3}
   spotterPrefab: {fileID: 3409122975560349004, guid: ec465a05a5911ff488f1e436c6a6b51f, type: 3}
-  strikerPrefab: {fileID: 3409122975560349004, guid: 1c18b9f7ba64c5045834eaddc7b657dc, type: 3}
+  strikerPrefab: {fileID: 3163535959416000784, guid: 1c18b9f7ba64c5045834eaddc7b657dc, type: 3}
   tankerPrefab: {fileID: 3439006757412432727, guid: 30242005deb0fa3459cdd85e2effa030, type: 3}
   transportPrefab: {fileID: 3409122975560349004, guid: 7de0cc5796113b74288c7a18348d1634, type: 3}
 --- !u!1001 &1522298361
