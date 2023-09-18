@@ -125,44 +125,52 @@ public class TileManager : MonoBehaviour
                     // for every candidate tile, find the one with the highest fire adjacencies 
                     TileBehaviour cScript = cTile.GetComponent<TileBehaviour>();
                     List<GameObject> cNeighbours = gridManager.getNeighbours(cScript.getCellPos());
-                    // if (!igniteList.Contains(cTile)){
-                    //     if (selected == null){
-                    //         selected = cTile;
-                    //         adjacencies = getFireAdjacencies(cNeighbours);
-                    //         vegetation = cScript.GetVegetation();
-                    //     }
-                    //     else
-                    //     {
-                    //         int cAdjacencies = getFireAdjacencies(cNeighbours);
-                    //         int cVegetation = cScript.GetVegetation();
-                    //         // change below for variation testing 
-                    //         if (cAdjacencies <= adjacencies || cVegetation <= vegetation) 
-                    //         {
-                    //             // if the current candidate has more fire adjacencies or vegetation than the current selected 
-                    //             selected = cTile;
-                    //             adjacencies = cAdjacencies;
-                    //             vegetation = cVegetation;
-                    //         }
-                    //     }
-                    // }
-                    // select the tile that has the highest z value
-                    int cZ = cTile.GetComponent<TileBehaviour>().getCellPos().z;
-                    if (!igniteList.Contains(cTile)){
-                        if (selected == null){
-                            selected = cTile;
-                        if (cZ > adjacencies){
-                            adjacencies = cZ;
-                        }
-                        }
-                        else
-                        {
-                            if (cZ > adjacencies){
+                    
+                    // with a 75% chance, select the tile with the highest z value
+                    int randomChance = Random.Range(0, 100);
+                    if (randomChance < 75){
+                        // select the tile that has the highest z value
+                        int cZ = cTile.GetComponent<TileBehaviour>().getCellPos().z;
+                        if (!igniteList.Contains(cTile)){
+                            if (selected == null){
                                 selected = cTile;
+                            if (cZ > adjacencies){
                                 adjacencies = cZ;
                             }
+                            }
+                            else
+                            {
+                                if (cZ > adjacencies){
+                                    selected = cTile;
+                                    adjacencies = cZ;
+                                }
+                            }
+                            
                         }
-                        
+                    } else {
+
+                        if (!igniteList.Contains(cTile)){
+                            if (selected == null){
+                                selected = cTile;
+                                adjacencies = getFireAdjacencies(cNeighbours);
+                                vegetation = cScript.GetVegetation();
+                            }
+                            else
+                            {
+                                int cAdjacencies = getFireAdjacencies(cNeighbours);
+                                int cVegetation = cScript.GetVegetation();
+                                // change below for variation testing 
+                                if (cAdjacencies <= adjacencies || cVegetation <= vegetation) 
+                                {
+                                    // if the current candidate has more fire adjacencies or vegetation than the current selected 
+                                    selected = cTile;
+                                    adjacencies = cAdjacencies;
+                                    vegetation = cVegetation;
+                                }
+                            }
+                        }
                     }
+
 
                 }
                 igniteList.Add(selected);
