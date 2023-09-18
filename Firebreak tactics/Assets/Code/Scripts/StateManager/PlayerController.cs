@@ -527,6 +527,8 @@ public class PlayerController : MonoBehaviour
         TileBehaviour tileScript = upTile.GetComponent<TileBehaviour>();
         UnitBehaviour unitScript = clickedUnit.GetComponent<UnitBehaviour>();
 
+        //print(GetDistance(unitScript.getCellPos(), tiles.WorldToCell(upTile.transform.position)));
+
         if (moveAction) 
         {
             
