@@ -74,7 +74,7 @@ public class TileManager : MonoBehaviour
     }
 
     public int GetSpreadRate(){
-        return Mathf.FloorToInt(2 + (fireTiles.Count / 7));
+        return Mathf.FloorToInt(1 + (fireTiles.Count / 7));
     }
 
     public bool hasIgnitableTiles(){
@@ -106,8 +106,8 @@ public class TileManager : MonoBehaviour
         List<GameObject> igniteList = new List<GameObject>(); // prevents ignite piggybacking 
         int spreadRate = GetSpreadRate();
         bool ember = false;
-        // roll a 5% chance to ember a tile
-        int emberChance = Random.Range(0, 100);
+        // roll a 75% chance to ember a tile
+        int emberChance = Random.Range(0, 75);
         if (emberChance < 1000){
             ember = true;
             spreadRate = spreadRate - 1;
@@ -125,26 +125,45 @@ public class TileManager : MonoBehaviour
                     // for every candidate tile, find the one with the highest fire adjacencies 
                     TileBehaviour cScript = cTile.GetComponent<TileBehaviour>();
                     List<GameObject> cNeighbours = gridManager.getNeighbours(cScript.getCellPos());
+                    // if (!igniteList.Contains(cTile)){
+                    //     if (selected == null){
+                    //         selected = cTile;
+                    //         adjacencies = getFireAdjacencies(cNeighbours);
+                    //         vegetation = cScript.GetVegetation();
+                    //     }
+                    //     else
+                    //     {
+                    //         int cAdjacencies = getFireAdjacencies(cNeighbours);
+                    //         int cVegetation = cScript.GetVegetation();
+                    //         // change below for variation testing 
+                    //         if (cAdjacencies <= adjacencies || cVegetation <= vegetation) 
+                    //         {
+                    //             // if the current candidate has more fire adjacencies or vegetation than the current selected 
+                    //             selected = cTile;
+                    //             adjacencies = cAdjacencies;
+                    //             vegetation = cVegetation;
+                    //         }
+                    //     }
+                    // }
+                    // select the tile that has the highest z value
+                    int cZ = cTile.GetComponent<TileBehaviour>().getCellPos().z;
                     if (!igniteList.Contains(cTile)){
                         if (selected == null){
                             selected = cTile;
-                            adjacencies = getFireAdjacencies(cNeighbours);
-                            vegetation = cScript.GetVegetation();
+                        if (cZ > adjacencies){
+                            adjacencies = cZ;
+                        }
                         }
                         else
                         {
-                            int cAdjacencies = getFireAdjacencies(cNeighbours);
-                            int cVegetation = cScript.GetVegetation();
-                            // change below for variation testing 
-                            if (cAdjacencies <= adjacencies || cVegetation <= vegetation) 
-                            {
-                                // if the current candidate has more fire adjacencies or vegetation than the current selected 
+                            if (cZ > adjacencies){
                                 selected = cTile;
-                                adjacencies = cAdjacencies;
-                                vegetation = cVegetation;
+                                adjacencies = cZ;
                             }
                         }
+                        
                     }
+
                 }
                 igniteList.Add(selected);
             }

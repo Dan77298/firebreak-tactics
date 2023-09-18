@@ -33,10 +33,10 @@ public class FireManager : MonoBehaviour
         List<WindDirection> choices = choices = new List<WindDirection>{
             WindDirection.N, WindDirection.E, WindDirection.S, WindDirection.W};
 
-        if (Ntime < 6){
-        // wind direction can't change to north until it's been 5 turns since north
-            choices.Remove(WindDirection.N);
-        }
+        // if (Ntime < 6){
+        // // wind direction can't change to north until it's been 5 turns since north
+        //     choices.Remove(WindDirection.N);
+        // }
 
         if (spreadTiles.Count <= tileManager.GetSpreadRate() || spreadTiles.Count < 3){
         // if the current direction will result in filling or underwhelming enemy turn, force a swap

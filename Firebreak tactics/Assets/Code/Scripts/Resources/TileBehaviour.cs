@@ -69,7 +69,7 @@ public class TileBehaviour : MonoBehaviour
                 traversalRule = 1;
                 onFire = false;
                 hasEmbered = false;
-                decay = 6;
+                decay = 7;
                 break;
             case TileType.Grass3:
                 vegetation = 3;
@@ -77,7 +77,7 @@ public class TileBehaviour : MonoBehaviour
                 traversalRule = 1;
                 onFire = false;
                 hasEmbered = false;
-                decay = 7;
+                decay = 9;
                 break;
             case TileType.Dirt:
                 vegetation = 0;
