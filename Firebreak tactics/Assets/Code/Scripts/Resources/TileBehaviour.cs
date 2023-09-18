@@ -261,6 +261,10 @@ public class TileBehaviour : MonoBehaviour
         }        
     }
 
+    public bool isBaseTile(){
+        return unitBase;
+    }
+
     public bool IsOccupied(){
         return occupyingUnit != null;
     }

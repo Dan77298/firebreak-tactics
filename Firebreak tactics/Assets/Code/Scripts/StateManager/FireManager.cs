@@ -109,6 +109,7 @@ public class FireManager : MonoBehaviour
                 else if (unitScript.getExtinguish() && (action.Value.name == "Fire" || action.Value.name == "Ember")){
                 // if the action is an extinguish 
                     tileManager.Extinguish(action.Value);
+                    unitScript.useWater(1);
                 }
                 else if (action.Value.name == "Water"){
                 // if the action is to refill unit
@@ -121,6 +122,7 @@ public class FireManager : MonoBehaviour
                         Debug.Log(action.Value);
                         tileImmunities.Add(action.Value);
                         tileScript.applyFoam(5);
+                        unitScript.useWater(1);
                     }
                 }
             }
