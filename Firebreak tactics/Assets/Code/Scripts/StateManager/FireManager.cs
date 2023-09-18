@@ -8,6 +8,7 @@ public class FireManager : MonoBehaviour
     [SerializeField] private WindDirection wind = WindDirection.S; // south default to establish game
     [SerializeField] private TileManager tileManager;
     [SerializeField] private UnitManager unitManager;
+    [SerializeField] private BaseManager baseManager; 
     [SerializeField] private TMP_Text Heat;
     [SerializeField] private TMP_Text Turn,Turn2;
     [SerializeField] private TMP_Text Fire;
@@ -171,6 +172,7 @@ public class FireManager : MonoBehaviour
             Turn2.text = "TURN " + numberOfTurns;
             Heat.text = "HEAT " + tileManager.GetSpreadRate();
             Fire.text = "FIRE " + tileManager.GetFireTiles().Count;
+            baseManager.CheckSpawn(numberOfTurns);
             GameManager.Instance.UpdateGameState(GameManager.GameState.PlayerTurn);
         }
     }

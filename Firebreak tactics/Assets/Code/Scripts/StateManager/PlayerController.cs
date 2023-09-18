@@ -151,7 +151,7 @@ public class PlayerController : MonoBehaviour
             //print(unitToMove);
 
             unitManager.moveUnitToTile(unitToMove, nextTile);
-            CenterUnitToTile(unitToMove, nextTile);
+            unitManager.CenterUnitToTile(unitToMove, nextTile);
 
             movePath.RemoveAt(0);
 
@@ -248,9 +248,11 @@ public class PlayerController : MonoBehaviour
             Transform water = UnitUI.transform.Find("water");
             Transform movement  = UnitUI.transform.Find("movement");
             Transform actions  = UnitUI.transform.Find("actions");
+            Transform unitName  = UnitUI.transform.Find("unit");
             TMP_Text waterText = water.GetComponent<TMP_Text>();
             TMP_Text movementText = movement.GetComponent<TMP_Text>(); 
             TMP_Text actionsText = actions.GetComponent<TMP_Text>(); 
+            TMP_Text unitText = unitName.GetComponent<TMP_Text>(); 
 
             if (waterText != null)
             {
@@ -265,6 +267,11 @@ public class PlayerController : MonoBehaviour
             if (actionsText != null)
             {
                 actionsText.text = "actions: " +unitScript.getActions();
+            }
+
+            if (unitText != null)
+            {
+                unitText.text = unit.name + " unit";
             }
         }
         unitCanvas.gameObject.SetActive(active);
@@ -568,21 +575,10 @@ public class PlayerController : MonoBehaviour
         GameObject unit = unitManager.GetUnitOnTile(downTile);
         unitManager.moveUnitToTile(unit, upTile);
         downTile.GetComponent<TileBehaviour>().highlightTile(false);
-        CenterUnitToTile(unit, upTile);
+        unitManager.CenterUnitToTile(unit, upTile);
     }
 
-    private void CenterUnitToTile(GameObject unit, GameObject tile){
 
-        Vector3 tilePosition = tile.transform.position;
-        Vector3Int cellPos = units.WorldToCell(tilePosition); 
-
-        Vector3 gridPosition = units.transform.position;
-        Vector3 adjustedNewPosition = units.GetCellCenterWorld(cellPos) + new Vector3(gridPosition.x+0.1f, 0f, gridPosition.z-0.3f);
-
-        adjustedNewPosition.y = unit.transform.position.y;
-
-        unit.transform.position = adjustedNewPosition;
-    }
 
     private void selectUnit(GameObject tile){
         selectedTile = tile;

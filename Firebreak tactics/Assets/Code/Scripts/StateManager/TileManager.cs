@@ -6,6 +6,7 @@ public class TileManager : MonoBehaviour
 {
     [SerializeField] private Grid gridTiles;
     [SerializeField] private GridManager gridManager; 
+    [SerializeField] private BaseManager baseManager; 
 
     private List<List<GameObject>> gridXZ;
     private List<GameObject> fireTiles = new List<GameObject>();

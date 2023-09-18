@@ -123,7 +123,7 @@ public class GridManager : MonoBehaviour
         return neighbours;
     }
 
-        public List<GameObject> getDirectionalNeighbours(Vector3Int cellPos, WindDirection wind){
+    public List<GameObject> getDirectionalNeighbours(Vector3Int cellPos, WindDirection wind){
     // gets a gameObject list of all neighbour tiles to a tile's cellPos
         List<GameObject> neighbours = new List<GameObject>();
 

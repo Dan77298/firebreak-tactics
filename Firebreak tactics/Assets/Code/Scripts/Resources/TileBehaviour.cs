@@ -25,6 +25,7 @@ public class TileBehaviour : MonoBehaviour
     [SerializeField] private Material selectedMaterial;
 
     [SerializeField] public GameObject borderPrefab;
+    [SerializeField] private bool unitBase = false; // the unit spawner tile 
     private GameObject borderInstance;
 
 

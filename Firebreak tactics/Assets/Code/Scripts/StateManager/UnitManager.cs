@@ -53,6 +53,19 @@ public class UnitManager : MonoBehaviour
         return gridManager.getTile(cellPos);
     }
 
+    public void CenterUnitToTile(GameObject unit, GameObject tile){
+
+        Vector3 tilePosition = tile.transform.position;
+        Vector3Int cellPos = unitsGrid.WorldToCell(tilePosition); 
+
+        Vector3 gridPosition = unitsGrid.transform.position;
+        Vector3 adjustedNewPosition = unitsGrid.GetCellCenterWorld(cellPos) + new Vector3(gridPosition.x+0.1f, 0f, gridPosition.z-0.3f);
+
+        adjustedNewPosition.y = unit.transform.position.y;
+
+        unit.transform.position = adjustedNewPosition;
+    }
+
     public bool duplicateAction(GameObject target){
     // returns whether the target is already a set action 
         foreach (var action in unitActions)
