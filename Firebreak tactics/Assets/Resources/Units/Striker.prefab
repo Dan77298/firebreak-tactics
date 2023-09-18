@@ -224,7 +224,7 @@ MonoBehaviour:
   actions: 2
   capacity: 6
   preventative: 1
-  extinguish: 0
+  extinguish: 1
   support: 0
   traversalType: 0
   cellPos: {x: 0, y: 0, z: 0}
