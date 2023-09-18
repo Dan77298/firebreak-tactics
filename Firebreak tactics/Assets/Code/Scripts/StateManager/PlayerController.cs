@@ -524,8 +524,14 @@ public class PlayerController : MonoBehaviour
         else if (upTile.name == "Fire"){
         // fire tile
             if (unitScript.getWater() > 0){
-            // if the unit has water 
-                unitManager.interactFire(clickedUnit, upTile);
+                // if the unit has water 
+
+                //if in range
+                Vector3Int depPos = unitScript.getCellPos();
+                Vector3Int targetPos = tiles.WorldToCell(upTile.transform.position);
+
+                if (GetDistance(depPos, targetPos) <= unitScript.GetRange())
+                    unitManager.interactFire(clickedUnit, upTile);
             }
             else{
                 actionRejected = "unit has no water";
@@ -533,9 +539,15 @@ public class PlayerController : MonoBehaviour
         }
         else if (upTile.name == "Water"){
         // water tile (refill)
-            if (tileScript.getCapacity() >0 && (unitScript.getWater() < unitScript.getCapacity())){
-            // if the tile has water left 
-              unitManager.interactTile(clickedUnit, upTile);  
+            if (tileScript.getCapacity() > 0 && (unitScript.getWater() < unitScript.getCapacity())){
+                // if the tile has water left 
+
+                //if next to water
+                Vector3Int depPos = unitScript.getCellPos();
+                Vector3Int targetPos = tiles.WorldToCell(upTile.transform.position);
+
+                if (GetDistance(depPos, targetPos) == 1)
+                    unitManager.interactTile(clickedUnit, upTile);  
             }
         }
         else if (upTile.name != "Road" && upTile.name != "Burned"){
@@ -555,8 +567,14 @@ public class PlayerController : MonoBehaviour
         // if the click is on a unit 
             GameObject upUnit = unitManager.GetUnitOnTile(upTile);      
             if (clickedUnit && clickedUnit != upUnit){
-            // if a unit was clicked and then a new unit is clicked
-                handleUnitInteraction();
+                // if a unit was clicked and then a new unit is clicked
+
+                //if next to other vehicle
+                Vector3Int depPos = clickedUnit.GetComponent<UnitBehaviour>().getCellPos();
+                Vector3Int targetPos = upUnit.GetComponent<UnitBehaviour>().getCellPos();
+
+                if (GetDistance(depPos, targetPos) == 1)
+                    handleUnitInteraction();
             }
             else if (clickedUnit == null && upUnit){
             // if there's no unit selected 
@@ -605,10 +623,21 @@ public class PlayerController : MonoBehaviour
 
     public int GetDistance(Vector3Int dep, Vector3Int target)
     {
-        return Mathf.Max(
-                Mathf.Abs(target.y - dep.y),
-                Mathf.Abs(target.y - dep.y),
-                Mathf.Abs(target.y - dep.y)
-            );
+        //convert coords to axial
+        Vector2Int depAxial = OffsetToAxial(dep);
+        Vector2Int targAxial = OffsetToAxial(target);
+
+        //get axial distance
+        return (Mathf.Abs(depAxial.x - targAxial.x)
+            + Mathf.Abs(depAxial.x + depAxial.y - targAxial.x - targAxial.y)
+            + Mathf.Abs(depAxial.y - targAxial.y)) / 2;
+    }
+
+    public Vector2Int OffsetToAxial(Vector3Int hex)
+    {
+        int q = hex.x - (hex.y - (hex.y % 2)) / 2;
+        int r = hex.y;
+
+        return new Vector2Int(q, r);
     }
 }

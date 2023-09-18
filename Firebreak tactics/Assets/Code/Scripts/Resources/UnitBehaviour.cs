@@ -90,6 +90,11 @@ public class UnitBehaviour : MonoBehaviour
     	this.water = this.water - water;
     }
 
+    public int GetRange()
+    {
+        return range;
+    }
+
     public void ResetMovements() 
     {
         movements = maxMovements;

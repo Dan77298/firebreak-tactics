@@ -402,12 +402,21 @@ public class TileBehaviour : MonoBehaviour
 
     public int GetDistance(TileBehaviour target)
     {
-        Vector3Int targetCoords = target.cellPos;
+        //convert coords to axial
+        Vector2Int depAxial = OffsetToAxial(cellPos);
+        Vector2Int targAxial = OffsetToAxial(target.cellPos);
 
-        return Mathf.Max(
-            Mathf.Abs(targetCoords.y - cellPos.y),
-            Mathf.Abs(targetCoords.y - cellPos.y),
-            Mathf.Abs(targetCoords.y - cellPos.y)
-            );
+        //get axial distance
+        return (Mathf.Abs(depAxial.x - targAxial.x)
+            + Mathf.Abs(depAxial.x + depAxial.y - targAxial.x - targAxial.y)
+            + Mathf.Abs(depAxial.y - targAxial.y)) / 2;
+    }
+
+    public Vector2Int OffsetToAxial(Vector3Int hex)
+    {
+        int q = hex.x - (hex.y - (hex.y % 2)) / 2;
+        int r = hex.y;
+
+        return new Vector2Int(q, r);
     }
 }
