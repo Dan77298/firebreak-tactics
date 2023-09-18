@@ -87,6 +87,7 @@ public class UnitBehaviour : MonoBehaviour
     }
 
     public void useWater(int water){
+        Debug.Log("useWater");
     	this.water = this.water - water;
     }
 

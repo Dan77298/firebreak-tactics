@@ -54,6 +54,7 @@ public class UnitManager : MonoBehaviour
     }
 
     public void CenterUnitToTile(GameObject unit, GameObject tile){
+        Debug.Log("centerunit");
 
         Vector3 tilePosition = tile.transform.position;
         Vector3Int cellPos = unitsGrid.WorldToCell(tilePosition); 
@@ -164,6 +165,7 @@ public class UnitManager : MonoBehaviour
     }
 
     public void moveUnitToTile(GameObject unit, GameObject newTile){
+        Debug.Log("moveUnitToTile");
     // used when issuing a move command 
         UnitBehaviour unitScript = unit.GetComponent<UnitBehaviour>();
         GameObject oldTile = unitScript.GetOccupyingTile();
@@ -185,6 +187,7 @@ public class UnitManager : MonoBehaviour
     }
 
     public void moveUnit(GameObject unit){
+        Debug.Log("moveUnit");
     // Update the occupying state of the old tile, new tile, and the unit
     // used when initialising 
         UnitBehaviour unitScript = unit.GetComponent<UnitBehaviour>();

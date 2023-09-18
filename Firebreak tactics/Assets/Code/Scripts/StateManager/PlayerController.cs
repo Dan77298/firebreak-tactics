@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject cameraHolder;
     [SerializeField] private float edgeScrollThreshold = 20f;
     [SerializeField] private Canvas UnitUI;
+    [SerializeField] private Canvas WaterUI;
     [SerializeField] private float maxZoom = 60.0f;
     [SerializeField] private float minZoom = 20.0f;
 
@@ -240,9 +241,38 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void displayWaterUI(bool active, GameObject tile){
+        RectTransform unitCanvas = WaterUI.GetComponent<RectTransform>();
+        WaterUI.enabled = active;
+        if (tile){
+            TileBehaviour tileScript = tile.GetComponent<TileBehaviour>();
+            Transform tilename = WaterUI.transform.Find("tile");
+            Transform actions = WaterUI.transform.Find("actions");
+            TMP_Text tileText = tilename.GetComponent<TMP_Text>();
+            TMP_Text actionsText = actions.GetComponent<TMP_Text>();
+
+            if (tileText != null)
+            {
+                tileText.text = "water tile";
+            }
+
+            if (actionsText != null)
+            {
+                if (tileScript.getCapacity() > 0){
+                    actionsText.text = "capacity: " +tileScript.getCapacity();
+                }
+                else{
+                    actionsText.text = "empty";
+                }
+            }
+        }
+        unitCanvas.gameObject.SetActive(active);
+        unitCanvas.position = Input.mousePosition;
+    }
+
     private void displayUnitUI(bool active, GameObject unit){
         RectTransform unitCanvas = UnitUI.GetComponent<RectTransform>();
-
+        UnitUI.enabled = active;
         if (unit){
             UnitBehaviour unitScript = unit.GetComponent<UnitBehaviour>();
             Transform water = UnitUI.transform.Find("water");
@@ -287,14 +317,21 @@ public class PlayerController : MonoBehaviour
             if (Mouse.current.leftButton.ReadValue() == 0f)
             {
                 // LMB up
+
                 if (selected.GetComponent<TileBehaviour>().IsOccupied()){
                 // if the selected tile is occupied by a unit 
                     highlightUnit(script, true);
                     displayUnitUI(true, selected.GetComponent<TileBehaviour>().GetOccupyingUnit());
+                    displayWaterUI(false, null);
+                }
+                else if (selected.name == "Water"){
+                    displayWaterUI(true, selected);
+                    displayUnitUI(false, null);
                 }
                 else{
                     //highlightUnit(script, false);
                     displayUnitUI(false, null);
+                    displayWaterUI(false, null);
                 }
                 if (previousTile){
                     if (previousTile.GetComponent<TileBehaviour>().IsOccupied())
@@ -493,7 +530,7 @@ public class PlayerController : MonoBehaviour
         if (moveAction) 
         {
             
-            if (upTile.name != "Fire" && upTile.name != "Water")
+            if (upTile.name != "Fire" && upTile.name != "Water" && !tileScript.IsOccupied() && !tileScript.isBaseTile())
             {
                 //get distance
                 Vector3Int depPos = unitScript.getCellPos();
@@ -589,7 +626,6 @@ public class PlayerController : MonoBehaviour
 
     private void dropUnit(){
         // drop the unit on the tile
-
         GameObject unit = unitManager.GetUnitOnTile(downTile);
         unitManager.moveUnitToTile(unit, upTile);
         downTile.GetComponent<TileBehaviour>().highlightTile(false);
