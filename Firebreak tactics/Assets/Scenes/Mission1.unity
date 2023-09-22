@@ -39600,6 +39600,7 @@ MonoBehaviour:
   UIE: {fileID: 1262299588}
   UIS: {fileID: 2071198296}
   UIW: {fileID: 243976799}
+  CompassNeedle: {fileID: 1147166116}
 --- !u!114 &1519993931
 MonoBehaviour:
   m_ObjectHideFlags: 0

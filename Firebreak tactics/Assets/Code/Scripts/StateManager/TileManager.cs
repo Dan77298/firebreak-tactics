@@ -47,6 +47,7 @@ public class TileManager : MonoBehaviour
             gridManager.updateNeighbourLookup();
             GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn);
         }
+        countTiles();
     }
 
     public void updateFireTiles(){

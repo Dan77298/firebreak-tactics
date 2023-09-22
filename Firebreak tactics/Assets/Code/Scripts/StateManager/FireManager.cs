@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class FireManager : MonoBehaviour
@@ -13,6 +14,8 @@ public class FireManager : MonoBehaviour
     [SerializeField] private TMP_Text Turn,Turn2;
     [SerializeField] private TMP_Text Fire;
     [SerializeField] private TMP_Text UIN,UIE,UIS,UIW;
+    [SerializeField] private Image CompassNeedle;
+
     private int numberOfTurns, time, Ntime = 0;
     private List<GameObject> tileImmunities = new List<GameObject>(); // list of all prevented tiles 
 
@@ -70,10 +73,10 @@ public class FireManager : MonoBehaviour
         time++; // resets on wind change 
         Ntime++; // prevents north overselection
         numberOfTurns++; // tracks number of player turns  
-        colourCompass();
+        needlechanger();
     }
 
-    private void colourCompass(){
+    private void needlechanger(){
         UIN.color = new Color32(171,171,171,255);
         UIE.color = new Color32(171,171,171,255);
         UIS.color = new Color32(171,171,171,255);
@@ -82,16 +85,16 @@ public class FireManager : MonoBehaviour
          // colour changer 
         switch (wind){
             case WindDirection.N:
-                UIN.color = new Color32(255,0,0,255);
+                CompassNeedle.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 0f);
                 break;
             case WindDirection.W:
-                UIW.color = new Color32(255,0,0,255);
+                CompassNeedle.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 90f);
                 break;
             case WindDirection.E:
-                UIE.color = new Color32(255,0,0,255);
+                CompassNeedle.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 270f);
                 break;
             default: // S
-                UIS.color = new Color32(255,0,0,255);
+                CompassNeedle.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 180f);
                 break;
         }
     }
