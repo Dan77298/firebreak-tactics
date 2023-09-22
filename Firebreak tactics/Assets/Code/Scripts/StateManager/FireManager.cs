@@ -167,7 +167,7 @@ public class FireManager : MonoBehaviour
             if (tileManager.hasTurnsRemaining() || tileManager.GetFireTiles().Count > 0)
             {
                 tileManager.SpreadFire((TileManager.WindDirection)wind);
-                GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn);
+                GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn, null);
             }
         }
 
@@ -180,7 +180,7 @@ public class FireManager : MonoBehaviour
             Heat.text = "HEAT " + tileManager.GetSpreadRate();
             Fire.text = "FIRE " + tileManager.GetFireTiles().Count;
             baseManager.CheckSpawn(numberOfTurns);
-            GameManager.Instance.UpdateGameState(GameManager.GameState.PlayerTurn);
+            GameManager.Instance.UpdateGameState(GameManager.GameState.PlayerTurn, null);
         }
     }
 }

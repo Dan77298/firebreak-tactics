@@ -24,7 +24,7 @@ public class PlayerTurnUI : MonoBehaviour
     public void EndTurn(){
     	if (PlayerTurn)
     	{
-    		GameManager.Instance.UpdateGameState(GameManager.GameState.EnemyTurn);
+    		GameManager.Instance.UpdateGameState(GameManager.GameState.EnemyTurn, null);
     	}
     }
 }

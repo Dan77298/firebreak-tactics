@@ -2,12 +2,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private GameObject LoseUI;
     [SerializeField] private GameObject VictoryUI;
     [SerializeField] private GameObject PlayerUI;
+    [SerializeField] private TMP_Text condition;
     public static GameManager Instance;
     public GameState State;
 
@@ -20,10 +23,10 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        UpdateGameState(GameState.ProduceTerrain);
+        UpdateGameState(GameState.ProduceTerrain, null);
     }
 
-    public void UpdateGameState(GameState _state)
+    public void UpdateGameState(GameState _state, string msg)
     {
         State = _state;
         Debug.Log("State change: " + _state);
@@ -42,6 +45,7 @@ public class GameManager : MonoBehaviour
                 Victory();
                 break;
             case GameState.Lose:
+                condition.text = msg;
                 Lose();
                 break;
             default:

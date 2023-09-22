@@ -41,11 +41,11 @@ public class TileManager : MonoBehaviour
     // all actions before the game gives the player their first turn
         if (_state == GameManager.GameState.ProduceTerrain)
         {
-            Debug.Log("ProduceTerrain");
+            //Debug.Log("ProduceTerrain");
             updateFireTiles();
             gridManager.initializeGrid();
             gridManager.updateNeighbourLookup();
-            GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn);
+            GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn, null);
         }
         countTiles();
     }
@@ -76,9 +76,15 @@ public class TileManager : MonoBehaviour
         }
 
         if (fireTiles.Count <= 0){
-        // victory by fire tiles depletion
-            GameManager.Instance.UpdateGameState(GameManager.GameState.Victory);
+            // victory by fire tiles depletion
+            GameManager.Instance.UpdateGameState(GameManager.GameState.Victory, null);
         }
+
+        if (GetBurnt() > 405){
+            // loss condition: forest burned down
+            GameManager.Instance.UpdateGameState(GameManager.GameState.Lose, "forest burned down");
+        }
+
     }
 
     public List<GameObject> GetFireTiles(){
@@ -119,8 +125,8 @@ public class TileManager : MonoBehaviour
         int spreadRate = GetSpreadRate();
         bool ember = false;
         // roll a 75% chance to ember a tile
-        int emberChance = Random.Range(0, 75);
-        if (emberChance < 1000){
+        int emberChance = Random.Range(0, 100);
+        if (emberChance < 75){
             ember = true;
             spreadRate = spreadRate - 1;
         }
@@ -243,7 +249,7 @@ public class TileManager : MonoBehaviour
                 }
                 // log the positions of all ember candidates
                 foreach (GameObject emberTile in emberCandidates){
-                    Debug.Log("Ember candidate " + emberTile.name + " at " + emberTile.transform.position);
+                    //Debug.Log("Ember candidate " + emberTile.name + " at " + emberTile.transform.position);
                 }
 
                 // select a random ember candidate and add it to the ignite list
@@ -253,7 +259,7 @@ public class TileManager : MonoBehaviour
                     igniteList.Add(emberTile);
                     // Debug.Log("Embered tile " + emberTile.name);
                     // log the position of the embered tile
-                    Debug.Log("Embered tile " + emberTile.name + " at " + emberTile.transform.position);
+                    //Debug.Log("Embered tile " + emberTile.name + " at " + emberTile.transform.position);
                 }
             }
 
@@ -264,9 +270,17 @@ public class TileManager : MonoBehaviour
                     if (newFire)
                     {
                         TileBehaviour script = newFire.GetComponent<TileBehaviour>();
-                        Debug.Log("Tile " + newFire.name + " set on fire.");
+                        //Debug.Log("Tile " + newFire.name + " set on fire.");
                         script.SetOnFire();
                         fireTiles.Add(newFire);
+                        if (script.IsOccupied()){
+                            // loss condition: unit casualty 
+                            GameManager.Instance.UpdateGameState(GameManager.GameState.Lose, "unit casualty");
+                        }
+                        else if (script.isBaseTile()){
+                            // loss condition: base burned down
+                            GameManager.Instance.UpdateGameState(GameManager.GameState.Lose, "base burned down");
+                        }
                     }
                 }                
             }
