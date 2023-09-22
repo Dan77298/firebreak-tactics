@@ -57,6 +57,7 @@ public class HealthBar : MonoBehaviour
     
     private void changeImageSize(Image image, Vector2 size)
     {
+        Debug.Log("this");
         RectTransform rectTransform = image.GetComponent<RectTransform>();
         rectTransform.sizeDelta = size;
     }
