@@ -13,6 +13,13 @@ public class TileManager : MonoBehaviour
     
     private bool hasIgnitableTile = true;
 
+    private int burnt = 0;
+    private int fire = 0;
+    private int forest1 = 0;
+    private int forest2 = 0;
+    private int forest3 = 0;
+    private int water = 0; 
+
     public enum WindDirection{
         N, E, S, W
     }
@@ -307,110 +314,65 @@ public class TileManager : MonoBehaviour
         return tally;
     }
 
-    // private GameObject SelectFireTile(WindDirection wind){
-    //     // currently random, add wind direction factor
-    //     int attempts = 0;
+    private void countTiles()
+    {   
+        burnt = 0;
+        fire = 0;
+        forest1 = 0;
+        forest2 = 0;
+        forest3 = 0;
+        water = 0;
+        
+        foreach (Transform child in gridTiles.transform) {
+            string name = child.gameObject.name;
+            
+            if (name == "Grass3") {
+                forest3++;
+            } else if (name == "Grass2") {
+                forest2++;
+            } else if (name == "Grass1") {
+                forest1++;
+            } else if (name == "Water") {
+                water++;
+            } else if (name == "Burned") {
+                burnt++;
+            } else if (name == "Fire") {
+                fire++;
+            }
+        }
+    }
 
-    //     while (attempts < fireTiles.Count)
-    //     {
-    //         int randomIndex = Random.Range(0, fireTiles.Count);
-    //         GameObject fireTile = fireTiles[randomIndex];
+    public int GetBurnt()
+    {
+        return burnt;
+    }
 
-    //         if (hasIgnitableNeighbours(fireTile, wind))
-    //         {
-    //             Debug.Log("Selected tile has ignitable neighbours");
-    //             return fireTile;
-    //         }
-    //         else
-    //         {
-    //             Debug.Log("Selected tile " + fireTile.name + " does not have ignitable neighbors.");
-    //         }
+    public int GetFire()
+    {
+        return fire;
+    }
 
-    //         attempts++;
-    //     }
+    public int GetForest1()
+    {
+        return forest1;
+    }
 
-    //     Debug.Log("No suitable tile found to spread fire to.");
-    //     return null;
-    // }
+    public int GetForest2()
+    {
+        return forest2;
+    }
+
+    public int GetForest3()
+    {
+        return forest3;
+    }
+
+    public int GetWater()
+    {
+        return water;
+    }
 
 
-    // private GameObject selectIgniteTile(GameObject fireTile, List<GameObject> excludeTiles, WindDirection wind){
-    //     // tile selected based on wind
-    //     TileBehaviour script = fireTile.GetComponent<TileBehaviour>();
-    //     List<GameObject> neighbours = gridManager.getDirectionalNeighbours(script.getCellPos(),(GridManager.WindDirection)wind);
-    //     List<GameObject> ignitableNeighbours = new List<GameObject>(); // neighbour candidates list
-
-    //     if (neighbours != null){
-    //         foreach (GameObject nTile in neighbours){
-    //             // make a candidate list of all possible neighbours to spread to
-    //             TileBehaviour nScript = nTile.GetComponent<TileBehaviour>();
-    //             if (nScript.CanOnFire() && !excludeTiles.Contains(nTile)){
-    //                 ignitableNeighbours.Add(nTile);
-    //             }
-    //         }
-
-    //         if (ignitableNeighbours.Count > 0){
-    //             int randomIndex = Random.Range(0, ignitableNeighbours.Count);
-    //             return ignitableNeighbours[randomIndex];
-    //         }
-    //     }
-    //     return null;
-    // }
-
-    // private bool hasIgnitableNeighbours(GameObject _tile, WindDirection wind)
-    // {
-    //     TileBehaviour script = _tile.GetComponent<TileBehaviour>();
-    //     List<GameObject> nTiles = gridManager.getDirectionalNeighbours(script.getCellPos(),(GridManager.WindDirection)wind);
-    //     //List<GameObject> nTiles = GetNeighbouringTiles(script.getCellPos());
-    //     //Debug.Log("hasIgnitableNeighbours " + script.getCellPos() + " |  " + nTiles.Count);
-    //     if (nTiles != null){
-    //         foreach (GameObject nTile in nTiles)
-    //         {
-    //             TileBehaviour nScript = nTile.GetComponent<TileBehaviour>();
-    //             if (nScript.CanOnFire())
-    //             {
-    //                 return true;
-    //             }
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    // public void SpreadFire(WindDirection wind){
-    //     List<GameObject> igniteList = new List<GameObject>(); // prevents ignite piggybacking 
-    //     int spreadRate = GetSpreadRate();
-
-    //     if (fireTiles.Count > 0)
-    //     {
-    //         GameObject fireTile = SelectFireTile(wind);
-    //         if (fireTile != null)
-    //         {
-    //             GameObject selected = selectIgniteTile(fireTile, igniteList, wind); // prevents duplicate entries
-    //             if (selected != null)
-    //             {
-    //                 igniteList.Add(selected);
-    //             }
-    //             else
-    //             {
-    //                 Debug.Log("No suitable ignitable neighbors found for tile " + fireTile.name);
-    //             }
-    //         }
-    //         else
-    //         {
-    //             Debug.Log("No suitable tile found to spread fire from.");
-    //             hasIgnitableTile = false;
-    //             return; // no more tiles to ignite
-    //         }
-    //     }
-
-    //     foreach (GameObject newFire in igniteList)
-    //     {
-    //         TileBehaviour script = newFire.GetComponent<TileBehaviour>();
-    //         Debug.Log("Tile " + newFire.name + " set on fire.");
-    //         script.SetOnFire();
-    //         fireTiles.Add(newFire);
-    //     }
-    // }
 }
 
 
