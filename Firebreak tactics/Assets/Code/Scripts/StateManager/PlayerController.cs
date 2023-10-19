@@ -112,14 +112,6 @@ public class PlayerController : MonoBehaviour
                 TileBehaviour script = selected.GetComponent<TileBehaviour>();
 
 
-                if (Mouse.current.leftButton.ReadValue() == 1f && selectedTile)
-                {
-                    // unit tracks mouse movement when mouse is down
-                    if (script.IsOccupied())
-                        dragUnit(unitManager.GetUnitOnTile(selectedTile));
-                }
-
-
                 checkMouseOverTile(selected, script);
             }
             else{
@@ -170,7 +162,6 @@ public class PlayerController : MonoBehaviour
 
     private void highlightMovementTiles(TileBehaviour origin, int range, bool show)
     {
-
         List<TileBehaviour> processed = new List<TileBehaviour>();
         List<TileBehaviour> toSearch = new List<TileBehaviour>();
         List<TileBehaviour> toAdd = new List<TileBehaviour>();
@@ -286,17 +277,17 @@ public class PlayerController : MonoBehaviour
 
             if (waterText != null)
             {
-                waterText.text = "water: [" +unitScript.getWater() + "/" + unitScript.getCapacity()+"]";
+                waterText.text = (unitScript.getWater() > 0 ? "water: " + unitScript.getWater().ToString() : "no water");
             }
 
             if (movementText != null)
             {
-                movementText.text = "movements: " +unitScript.getMovements();
+                movementText.text = (unitScript.GetMovements() > 0 ? "movements: " + unitScript.GetMovements().ToString() : "no movements");
             }
 
             if (actionsText != null)
             {
-                actionsText.text = "actions: " +unitScript.getActions();
+                actionsText.text = (unitScript.getActions() > 0 ? "actions: " + unitScript.getActions().ToString() : "no actions");
             }
 
             if (unitText != null)
@@ -340,24 +331,6 @@ public class PlayerController : MonoBehaviour
                 }   
                 previousTile = selected;  
             }
-            else if (Mouse.current.leftButton.ReadValue() == 1f && selectedTile)
-            {
-                // LMB down
-                clickedUnit = null;
-                if (!selected.GetComponent<TileBehaviour>().IsOccupied())
-                {
-                    script.selectTile(true);
-                }
-                else
-                {
-                    script.selectTile(false);
-                }
-                if (previousTile)
-                {
-                    previousTile.GetComponent<TileBehaviour>().selectTile(false);
-                }
-                previousTile = selected;
-            }
         }
     }
 
@@ -397,33 +370,6 @@ public class PlayerController : MonoBehaviour
         Camera.main.fieldOfView = Mathf.Clamp(Camera.main.fieldOfView - scrollWheel * zoomSpeed, minZoom, maxZoom);
     }
 
-
-    private void dragUnit(GameObject unit){
-    // make unit follow cursor 
-        dragging = true;
-        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit)){
-            Vector3 mousePosition3D = hit.point;
-            
-            if (mouseStart == Vector3.zero){
-                mouseStart = mousePosition3D;
-            }
-
-            Vector3 offset = mousePosition3D - mouseStart;
-            Vector3 newPosition = unit.transform.position + offset;
-            newPosition.y = unit.transform.position.y;
-
-            unit.transform.position = newPosition;
-
-            mouseStart = mousePosition3D;
-        }
-
-
-        displayUnitUI(true, unit);
-    }
-
     private void HandleMouseDown(InputAction.CallbackContext context){
         // fired when left or right mouse button down
         
@@ -436,18 +382,7 @@ public class PlayerController : MonoBehaviour
                 
                     downTile = hit.collider.gameObject;
 
-                    if (Mouse.current.leftButton.ReadValue() == 1f){
-                        // LMB is down
-                        if (belongsTo(downTile, tiles.transform)){
-                        // tile is clicked
-                            if (downTile.GetComponent<TileBehaviour>().IsOccupied()){
-                            // selecting a unit
-                                Debug.Log("selectUnit"); 
-                                selectUnit(downTile);
-                            }
-                        }  
-                    }
-                    else if (Mouse.current.rightButton.ReadValue() == 1f){
+                    if (Mouse.current.rightButton.ReadValue() == 1f){
                         // RMB is down
                         
                         unitManager.requestCancel(downTile);
@@ -456,10 +391,9 @@ public class PlayerController : MonoBehaviour
                         // tile is clicked
                             if (!moveAction && !movingUnit && downTile.GetComponent<TileBehaviour>().IsOccupied()){
                             // selecting a unit
-                                Debug.Log("selectUnit"); 
+                                Debug.Log("moveUnit"); 
                                 selectUnit(downTile);
                                 moveAction = true;
-
 
                                 highlightMovementTiles(downTile.GetComponent<TileBehaviour>(),
                                     unitManager.GetUnitOnTile(downTile).GetComponent<UnitBehaviour>().GetMovements(), 
@@ -514,6 +448,7 @@ public class PlayerController : MonoBehaviour
     }
 
     private void closeInteraction(){
+        Debug.Log("close");
         actionRejected = "";
         dragging = false;  
         clickedUnit = null;
@@ -527,48 +462,40 @@ public class PlayerController : MonoBehaviour
         TileBehaviour tileScript = upTile.GetComponent<TileBehaviour>();
         UnitBehaviour unitScript = clickedUnit.GetComponent<UnitBehaviour>();
 
-        //print(GetDistance(unitScript.getCellPos(), tiles.WorldToCell(upTile.transform.position)));
+        Vector3Int depPos = unitScript.getCellPos();
+        Vector3Int targetPos = tiles.WorldToCell(upTile.transform.position);
+
+        GameObject depTile = gridManager.getTile(depPos);
 
         if (moveAction) 
         {
-            
             if (upTile.name != "Fire" && upTile.name != "Water" && !tileScript.IsOccupied() && !tileScript.isBaseTile())
             {
                 //get distance
-                Vector3Int depPos = unitScript.getCellPos();
-                Vector3Int targetPos = tiles.WorldToCell(upTile.transform.position);
 
                 if (GetDistance(depPos, targetPos) <= unitScript.GetMovements())
                 {
-                    //find path
-                    GameObject depTile = gridManager.getTile(depPos);
+                    // find path
 
                     movePath = gridManager.FindPath(depTile.GetComponent<TileBehaviour>(),
-                        tileScript, unitScript.GetTraversalType());
+                    tileScript, unitScript.GetTraversalType());
 
                     moveAction = false;
                     movingUnit = true;
                     unitToMove = clickedUnit;
 
-                    highlightMovementTiles(depTile.GetComponent<TileBehaviour>(), unitScript.GetMovements(), false);
-
                     unitScript.SetMovements(unitScript.GetMovements() -
-                        depTile.GetComponent<TileBehaviour>().GetDistance(tileScript));
+                    depTile.GetComponent<TileBehaviour>().GetDistance(tileScript));
 
                     return;
-                }
-                
+                }    
             }
         }
         else if (upTile.name == "Fire"){
         // fire tile
             if (unitScript.getWater() > 0){
-                // if the unit has water 
-
-                //if in range
-                Vector3Int depPos = unitScript.getCellPos();
-                Vector3Int targetPos = tiles.WorldToCell(upTile.transform.position);
-
+                // if the unit has water and in range
+            
                 if (GetDistance(depPos, targetPos) <= unitScript.GetRange())
                     unitManager.interactFire(clickedUnit, upTile);
             }
@@ -579,11 +506,7 @@ public class PlayerController : MonoBehaviour
         else if (upTile.name == "Water"){
         // water tile (refill)
             if (tileScript.getCapacity() > 0 && (unitScript.getWater() < unitScript.getCapacity())){
-                // if the tile has water left 
-
-                //if next to water
-                Vector3Int depPos = unitScript.getCellPos();
-                Vector3Int targetPos = tiles.WorldToCell(upTile.transform.position);
+                // if the tile has water left
 
                 if (GetDistance(depPos, targetPos) == 1)
                     unitManager.interactTile(clickedUnit, upTile);  
@@ -596,6 +519,7 @@ public class PlayerController : MonoBehaviour
         else{
             actionRejected = "tile cannot be interacted with"; // check where this occurs, make edge cases for it 
         }
+        highlightMovementTiles(depTile.GetComponent<TileBehaviour>(), 50, false);
         closeInteraction();
     }
 
