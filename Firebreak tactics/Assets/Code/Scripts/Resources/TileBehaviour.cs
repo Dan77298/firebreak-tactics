@@ -142,6 +142,7 @@ public class TileBehaviour : MonoBehaviour
                 traversalCost = 2;
                 traversalRule = 3;
                 hasEmbered = false;
+                
                 break;
             case TileType.Road:
                 defaultTile = TileType.Road;
@@ -185,6 +186,11 @@ public class TileBehaviour : MonoBehaviour
                 decay = 0;
                 onFire = false;
                 vegetation = 0;
+                foreach (Transform child in transform){
+                    if (child.tag == "Fog"){
+                        Destroy(child.gameObject);
+                    }
+                }
                 break;
             case TileType.Highlighted:
                 break;
@@ -299,6 +305,16 @@ public class TileBehaviour : MonoBehaviour
 
     public void SetOccupyingUnit(GameObject unit){
         occupyingUnit = unit;
+        // remove the fog of war from this tile an all adjacent tiles and their adjacent tiles
+        // foreach (Transform child in transform){
+        //     if (child.tag == "Fog"){
+        //         Destroy(child.gameObject);
+        //     }
+        // }
+        // get adjacent tiles
+        // List<TileBehaviour> adjacentTiles = new List<TileBehaviour>();
+        // adjacentTiles =
+        
     }
 
     public Vector3Int getCellPos(){

@@ -14,6 +14,44 @@ public class UnitManager : MonoBehaviour
         GameManager.OnGameStateChanged += GameStateChanged;
     }
 
+    void Update(){
+        // remove fog tiles from the tiles occupied by units
+        foreach (Transform unitTransform in unitsGrid.transform){
+            if (unitTransform.tag == "Unit"){
+                GameObject unit = unitTransform.gameObject;
+                GameObject tile = getTile(unit);
+                TileBehaviour tileScript = tile.GetComponent<TileBehaviour>();
+                Debug.Log("These are the tiles you are looking for: " + tile);
+                // destroy the all children of the tile with the tag "Fog"
+                foreach (Transform child in tile.transform){
+                    if (child.tag == "Fog"){
+                        Destroy(child.gameObject);
+                    }
+                }
+                // get the adjacent tiles and destroy the fog
+                List<GameObject> adjacentTiles = gridManager.getNeighbours(tileScript.getCellPos());
+                foreach (GameObject adjacentTile in adjacentTiles){
+                    foreach (Transform child in adjacentTile.transform){
+                        if (child.tag == "Fog"){
+                            Destroy(child.gameObject);
+                        }
+                    }
+                }
+                // get the adjacent tiles adjacent tiles and destroy the fog
+                foreach (GameObject adjacentTile in adjacentTiles){
+                    List<GameObject> adjacentTiles2 = gridManager.getNeighbours(adjacentTile.GetComponent<TileBehaviour>().getCellPos());
+                    foreach (GameObject adjacentTile2 in adjacentTiles2){
+                        foreach (Transform child in adjacentTile2.transform){
+                            if (child.tag == "Fog"){
+                                Destroy(child.gameObject);
+                            }
+                        }
+                    }
+                }                
+            }
+        }
+    }
+
     void OnDestroy(){
     // remove state listener when game is finished
         GameManager.OnGameStateChanged -= GameStateChanged;

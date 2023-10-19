@@ -7,6 +7,7 @@ public class GridManager : MonoBehaviour
     [SerializeField] public Grid grid;
 
     public List<List<GameObject>> gridXZ = new List<List<GameObject>>();
+    public List<GameObject> FogTiles = new List<GameObject>();
     private Dictionary<GameObject, List<GameObject>> neighbourLookup = new Dictionary<GameObject, List<GameObject>>();
 
     [SerializeField] private int gridCols;
@@ -70,6 +71,31 @@ public class GridManager : MonoBehaviour
         //             print("gameObj " + gridXZ[x][y].name);
         //     }
         // }
+
+
+        // Create all of the fog of war tiles in the positions of all of the tiles and add them to a list
+        foreach (Transform child in grid.transform)
+        {
+            //if tile
+            // if (child.tag == "Tile" || child.tag == "Water" || child.tag == "Fire")
+            if (child.tag == "Tile")
+            {
+                Vector3Int cellPos = child.GetComponent<TileBehaviour>().cellPos;
+                Vector3 worldPos = grid.GetCellCenterWorld(cellPos);
+                // shift the fog tile up slightly so it is above the tile
+                worldPos.y += 0.25f;
+                GameObject fogTile = Instantiate(Resources.Load("Tiles/Fog"), worldPos, Quaternion.identity) as GameObject;
+                // set the rotation of the fog tile to match the tile
+                fogTile.transform.rotation = child.transform.rotation;
+                // set the scale of the fog to x 0.6 y 0.05 z 0.6
+                Vector3 desiredScale = new Vector3(0.3f, 0.025f, 0.3f);
+                fogTile.transform.localScale = desiredScale;
+                fogTile.transform.parent = child;
+                FogTiles.Add(fogTile);
+            }
+        }
+
+
     }
 
     public void updateNeighbourLookup(){
