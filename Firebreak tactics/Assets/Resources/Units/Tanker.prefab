@@ -351,9 +351,9 @@ MonoBehaviour:
   maxMovements: 3
   actions: 3
   capacity: 9
-  preventative: 1
+  preventative: 0
   extinguish: 0
-  support: 0
+  support: 1
   traversalType: 0
   cellPos: {x: 0, y: 0, z: 0}
   originPos: {x: 0, y: 0, z: 0}

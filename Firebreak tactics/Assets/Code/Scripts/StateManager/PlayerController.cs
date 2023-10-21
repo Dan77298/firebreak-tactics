@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject cameraHolder;
     [SerializeField] private float edgeScrollThreshold = 20f;
     [SerializeField] private Canvas UnitUI;
+    [SerializeField] private GameObject settings;
     [SerializeField] private Canvas WaterUI;
     [SerializeField] private float maxZoom = 60.0f;
     [SerializeField] private float minZoom = 20.0f;
@@ -91,11 +92,21 @@ public class PlayerController : MonoBehaviour
 
 
     private void Update(){
+        if (Input.GetKeyDown(KeyCode.Escape)){
+            Debug.Log("escape");
+            if (settings.activeSelf){
+                settings.SetActive(false);
+            }
+            else{
+                settings.SetActive(true);
+            }
+        }
+
         if (Mouse.current.leftButton.ReadValue() == 0f){
             handleMouseRelease();
         }
         
-        checkCameraMovement();
+        
 
 
         if (movingUnit)
@@ -104,6 +115,8 @@ public class PlayerController : MonoBehaviour
         }
         else if (currentState == GameManager.GameState.PlayerTurn){
         // if it's the player's turn
+            checkCameraMovement();
+
             ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit)){
