@@ -6,26 +6,11 @@ public class ScreenManager : MonoBehaviour
 {
     [SerializeField] private GameObject PlayerUI;
     [SerializeField] private GameObject Tutorial;
+    [SerializeField] private GameObject Settings;
 
     [SerializeField] private GameObject current;
     [SerializeField] private GameObject next;
     [SerializeField] private GameObject prev;
-
-    private GameManager.GameState currentState;
-
-    void Start()
-    {
-        GameManager.OnGameStateChanged += GameStateChanged;
-    }
-
-    private void OnDestroy()
-    {
-        GameManager.OnGameStateChanged -= GameStateChanged;
-    }
-
-    private void GameStateChanged(GameManager.GameState newState)
-    {
-    }
 
     public void NextScreen()
     {
@@ -39,10 +24,16 @@ public class ScreenManager : MonoBehaviour
         prev.SetActive(true);
     }
 
-    public void EndTutorial()
-    {
+    public void closeTutorial(){
         PlayerUI.SetActive(true);
         Tutorial.SetActive(false);
-        GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn, null);
+        if (Settings){
+            Settings.SetActive(false);
+        }
+    }
+
+    public void beginGame()
+    {
+        closeTutorial();
     }
 }

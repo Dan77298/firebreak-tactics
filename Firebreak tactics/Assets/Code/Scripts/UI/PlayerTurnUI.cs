@@ -17,14 +17,12 @@ public class PlayerTurnUI : MonoBehaviour
 
     private void GameStateChanged(GameManager.GameState _state){
         PlayerTurn = (_state == GameManager.GameState.PlayerTurn);
-        if (PlayerTurn){
-        }
     }
 
     public void EndTurn(){
-    	if (PlayerTurn)
-    	{
-    		GameManager.Instance.UpdateGameState(GameManager.GameState.EnemyTurn, null);
-    	}
+    	Debug.Log(PlayerTurn);
+        if (PlayerTurn){
+            GameManager.Instance.UpdateGameState(GameManager.GameState.EnemyTurn, null);
+        }   
     }
 }
