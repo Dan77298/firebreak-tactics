@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float cameraMoveSpeed = 5f;
     [SerializeField] private GameObject cameraHolder;
     [SerializeField] private float edgeScrollThreshold = 20f;
+    [SerializeField] private GameObject settings;
     [SerializeField] private Canvas UnitUI;
     [SerializeField] private Canvas WaterUI;
     [SerializeField] private float maxZoom = 60.0f;
@@ -91,6 +92,16 @@ public class PlayerController : MonoBehaviour
 
 
     private void Update(){
+        if (Input.GetKeyDown(KeyCode.Escape)){
+            Debug.Log("escape");
+            if (settings.activeSelf){
+                settings.SetActive(false);
+            }
+            else{
+                settings.SetActive(true);
+            }
+        }
+
         if (Mouse.current.leftButton.ReadValue() == 0f){
             handleMouseRelease();
         }
