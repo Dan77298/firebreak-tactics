@@ -31,7 +31,6 @@ public class HealthBar : MonoBehaviour
     }
     
     private float calculateBarSize(int tiles) {
-        Debug.Log("running");
         float percentage = (float) tiles/totalTiles;
         return (float) percentage * 500;
     }
@@ -40,7 +39,6 @@ public class HealthBar : MonoBehaviour
         float burntBarSize = calculateBarSize(tileManager.GetBurnt());
         changeImageSize(burntBar, new Vector2(burntBarSize, 30f));
         
-        Debug.Log("get fire: " + calculateBarSize(tileManager.GetFire()));
         float fireBarSize = calculateBarSize(tileManager.GetFire());
         changeImageSize(fireBar, new Vector2(fireBarSize, 30f));
         
@@ -59,7 +57,6 @@ public class HealthBar : MonoBehaviour
     
     private void changeImageSize(Image image, Vector2 size)
     {
-        Debug.Log("this");
         RectTransform rectTransform = image.GetComponent<RectTransform>();
         rectTransform.sizeDelta = size;
     }

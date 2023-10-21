@@ -207,7 +207,7 @@ public class UnitManager : MonoBehaviour
 
     private void GameStateChanged(GameManager.GameState newState){
     // reset unitActions at start of turn 
-        Debug.Log(newState);
+        //Debug.Log(newState);
         if (newState == GameManager.GameState.PreTurn)
         {
             initializeUnitPositions();

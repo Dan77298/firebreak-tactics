@@ -161,7 +161,7 @@ public class FireManager : MonoBehaviour
         if (_state == GameManager.GameState.EnemyTurn)
         {
             // upon player ending turn, check for win/loss conditions
-            Debug.Log("FireManager listening");
+            Debug.Log("FireManager EnemyTurn");
             handleUnitActions();
             checkTileImmunities();
             if (tileManager.hasTurnsRemaining() || tileManager.GetFireTiles().Count > 0)
@@ -173,6 +173,7 @@ public class FireManager : MonoBehaviour
 
         if (_state == GameManager.GameState.PreTurn)
         {
+            Debug.Log("firemanager PreTurn");
             ChangeWindDirection();
             tileManager.DecayFire();
             Turn.text = "TURN " + numberOfTurns;

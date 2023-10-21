@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private TileManager tileManager;
     [SerializeField] private UnitManager unitManager;
     [SerializeField] private GridManager gridManager;
+    [SerializeField] private GameObject tutorial;
     [SerializeField] private InputActionReference Keyboard, Click;
     [SerializeField] private float cameraMoveSpeed = 5f;
     [SerializeField] private GameObject cameraHolder;
@@ -105,16 +106,17 @@ public class PlayerController : MonoBehaviour
         if (Mouse.current.leftButton.ReadValue() == 0f){
             handleMouseRelease();
         }
-        
-        checkCameraMovement();
 
 
         if (movingUnit)
         {
             MoveUnit();
         }
-        else if (currentState == GameManager.GameState.PlayerTurn){
+        else if (currentState == GameManager.GameState.PlayerTurn && !tutorial.activeSelf){
         // if it's the player's turn
+
+        checkCameraMovement();
+        
             ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit)){
