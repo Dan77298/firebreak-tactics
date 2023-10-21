@@ -45,6 +45,7 @@ public class TileManager : MonoBehaviour
             updateFireTiles();
             gridManager.initializeGrid();
             gridManager.updateNeighbourLookup();
+            GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn, null);
         }
         countTiles();
     }
