@@ -80,6 +80,9 @@ public class UnitManager : MonoBehaviour
     }
 
     public void requestCancel(GameObject target){
+
+        if (target == null) 
+            return;
         TileBehaviour script = target.GetComponent<TileBehaviour>();
         List<GameObject> queueRemove = new List<GameObject>();
 

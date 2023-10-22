@@ -20,9 +20,12 @@ public class BaseManager : MonoBehaviour
 
     private Dictionary<int, UnitType> spawnTable = new Dictionary<int, UnitType>
     {
+        { 6, UnitType.Tanker },
         { 3, UnitType.Striker },
         { 5, UnitType.Foam },
         { 8, UnitType.Spotter },
+        { 10, UnitType.Scout },
+        { 12, UnitType.Transport }
     };
 
     private enum UnitType

@@ -58,6 +58,102 @@ public class SceneLoad
 
     // A Test behaves as an ordinary method
     [Test]
+    public void TutorialSkips()
+    {
+        // Use the Assert class to test conditions
+        go = GameObject.Find("skip");
+
+        Assert.IsNotNull(go);
+
+        go.GetComponent<ScreenManager>().closeTutorial();
+
+        go = GameObject.Find("Tutorial");
+
+        Assert.IsNull(go);
+    }
+
+    // A Test behaves as an ordinary method
+    [Test]
+    public void TutorialNext()
+    {
+        // Use the Assert class to test conditions
+        go = GameObject.Find("next");
+
+        Assert.IsNotNull(go);
+
+        go.GetComponent<ScreenManager>().NextScreen();
+
+        go = GameObject.Find("page2");
+
+        Assert.IsNotNull(go);
+
+        go = GameObject.Find("next");
+
+        go.GetComponent<ScreenManager>().NextScreen();
+
+        go = GameObject.Find("page3");
+
+        Assert.IsNotNull(go);
+
+        go = GameObject.Find("next");
+
+        go.GetComponent<ScreenManager>().NextScreen();
+
+        go = GameObject.Find("page4");
+
+        Assert.IsNotNull(go);
+
+        go = GameObject.Find("next");
+
+        go.GetComponent<ScreenManager>().NextScreen();
+
+        go = GameObject.Find("page5");
+
+        Assert.IsNotNull(go);
+    }
+
+    // A Test behaves as an ordinary method
+    [Test]
+    public void TutorialPrev()
+    {
+        // Use the Assert class to test conditions
+        go = GameObject.Find("back");
+
+        Assert.IsNotNull(go);
+
+        go.GetComponent<ScreenManager>().PrevScreen();
+
+        go = GameObject.Find("page4");
+
+        Assert.IsNotNull(go);
+
+        go = GameObject.Find("back");
+
+        go.GetComponent<ScreenManager>().PrevScreen();
+
+        go = GameObject.Find("page3");
+
+        Assert.IsNotNull(go);
+
+        go = GameObject.Find("back");
+
+        go.GetComponent<ScreenManager>().PrevScreen();
+
+        go = GameObject.Find("page2");
+
+        Assert.IsNotNull(go);
+
+        go = GameObject.Find("back");
+
+        go.GetComponent<ScreenManager>().PrevScreen();
+
+        go = GameObject.Find("page1");
+
+        Assert.IsNotNull(go);
+    }
+
+    // A Test behaves as an ordinary method
+    [Test]
     public void VictoryUILoads()
     {
         GameObject.Find("State Manager").GetComponent<GameManager>().Victory();
@@ -194,7 +290,7 @@ public class SceneLoad
     [UnityTest]
     public IEnumerator AStarValidateAir()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1.0f);
 
         // Use the Assert class to test conditions
         GameObject go = GameObject.Find("State Manager");
@@ -278,6 +374,38 @@ public class SceneLoad
     }
 
     [Test]
+    public void ValidateUnitOnTile()
+    {
+        // Use the Assert class to test conditions
+        GameObject go = GameObject.Find("State Manager");
+
+        GridManager gm = go.GetComponent<GridManager>();
+        UnitManager um = go.GetComponent<UnitManager>();
+
+        Assert.IsNotNull(gm);
+        Assert.IsNotNull(um);
+
+        Assert.IsNotNull(um.GetUnitOnTile(gm.getTile(new Vector3Int(22, 4, 0))));
+        Assert.AreEqual(um.GetUnitOnTile(gm.getTile(new Vector3Int(22, 4, 0))).name, "Foam");
+    }
+
+
+    [Test]
+    public void ValidateUnitOnEmptyTile()
+    {
+        // Use the Assert class to test conditions
+        GameObject go = GameObject.Find("State Manager");
+
+        GridManager gm = go.GetComponent<GridManager>();
+        UnitManager um = go.GetComponent<UnitManager>();
+
+        Assert.IsNotNull(gm);
+        Assert.IsNotNull(um);
+
+        Assert.IsNull(um.GetUnitOnTile(gm.getTile(new Vector3Int(20, 17, 0))));
+    }
+
+    [Test]
     public void UnitsValidate()
     {
         // Use the Assert class to test conditions
@@ -322,5 +450,236 @@ public class SceneLoad
 
             }
         }
+    }
+
+    [Test]
+    public void ValidateMove()
+    {
+        // Use the Assert class to test conditions
+        GameObject go = GameObject.Find("State Manager");
+
+        BaseManager bm = go.GetComponent<BaseManager>();
+
+        UnitManager um = go.GetComponent<UnitManager>();
+
+        GridManager gm = go.GetComponent<GridManager>();
+
+        Assert.IsNotNull(bm);
+        Assert.IsNotNull(um);
+        Assert.IsNotNull(gm);
+
+        GameObject destTile = gm.getTile(new Vector3Int(17,11, 0));
+
+        GameObject unitToMove = um.GetUnitOnTile(gm.getTile(new Vector3Int(21, 4, 0)));
+
+        um.requestCancel(gm.getTile(new Vector3Int(21, 4, 0)));
+
+        Assert.IsNotNull(unitToMove);
+        Assert.AreEqual(unitToMove.name, "Scout");
+
+        um.moveUnitToTile(unitToMove, destTile);
+        um.CenterUnitToTile(unitToMove, destTile);
+
+        GameObject movedUnit = um.GetUnitOnTile(destTile);
+    
+        Assert.AreSame(unitToMove, movedUnit);
+    }
+
+    [Test]
+    public void ValidateSpawnStriker()
+    {
+        // Use the Assert class to test conditions
+        GameObject go = GameObject.Find("State Manager");
+
+        BaseManager bm = go.GetComponent<BaseManager>();
+
+        UnitManager um = go.GetComponent<UnitManager>();
+
+        GridManager gm = go.GetComponent<GridManager>();
+
+        Assert.IsNotNull(bm);
+        Assert.IsNotNull(um);
+        Assert.IsNotNull(gm);
+
+        bm.CheckSpawn(3);
+
+        GameObject destTile = gm.getTile(new Vector3Int(0, 0, 0));
+
+        GameObject newUnit = um.GetUnitOnTile(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        newUnit.GetComponent<UnitBehaviour>().SetOccupyingTile(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        um.requestCancel(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        Assert.IsNotNull(newUnit);
+        Assert.AreEqual(newUnit.name, "Striker");
+
+        um.moveUnitToTile(newUnit, destTile);
+        um.CenterUnitToTile(newUnit, destTile);
+    }
+
+    [Test]
+    public void ValidateSpawnFoam()
+    {
+        // Use the Assert class to test conditions
+        GameObject go = GameObject.Find("State Manager");
+
+        BaseManager bm = go.GetComponent<BaseManager>();
+
+        UnitManager um = go.GetComponent<UnitManager>();
+
+        GridManager gm = go.GetComponent<GridManager>();
+
+        Assert.IsNotNull(bm);
+        Assert.IsNotNull(um);
+        Assert.IsNotNull(gm);
+
+        bm.CheckSpawn(5);
+
+        GameObject destTile = gm.getTile(new Vector3Int(0, 1, 0));
+
+        GameObject newUnit = um.GetUnitOnTile(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        newUnit.GetComponent<UnitBehaviour>().SetOccupyingTile(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        um.requestCancel(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        Assert.IsNotNull(newUnit);
+        Assert.AreEqual(newUnit.name, "Foam");
+
+        um.moveUnitToTile(newUnit, destTile);
+        um.CenterUnitToTile(newUnit, destTile);
+    }
+
+    [Test]
+    public void ValidateSpawnScout()
+    {
+        // Use the Assert class to test conditions
+        GameObject go = GameObject.Find("State Manager");
+
+        BaseManager bm = go.GetComponent<BaseManager>();
+
+        UnitManager um = go.GetComponent<UnitManager>();
+
+        GridManager gm = go.GetComponent<GridManager>();
+
+        Assert.IsNotNull(bm);
+        Assert.IsNotNull(um);
+        Assert.IsNotNull(gm);
+
+        bm.CheckSpawn(10);
+
+        GameObject destTile = gm.getTile(new Vector3Int(0, 2, 0));
+
+        GameObject newUnit = um.GetUnitOnTile(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        newUnit.GetComponent<UnitBehaviour>().SetOccupyingTile(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        um.requestCancel(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        Assert.IsNotNull(newUnit);
+        Assert.AreEqual(newUnit.name, "Scout");
+
+        um.moveUnitToTile(newUnit, destTile);
+        um.CenterUnitToTile(newUnit, destTile);
+    }
+
+    [Test]
+    public void ValidateSpawnSpotter()
+    {
+        // Use the Assert class to test conditions
+        GameObject go = GameObject.Find("State Manager");
+
+        BaseManager bm = go.GetComponent<BaseManager>();
+
+        UnitManager um = go.GetComponent<UnitManager>();
+
+        GridManager gm = go.GetComponent<GridManager>();
+
+        Assert.IsNotNull(bm);
+        Assert.IsNotNull(um);
+        Assert.IsNotNull(gm);
+
+        bm.CheckSpawn(8);
+
+        GameObject destTile = gm.getTile(new Vector3Int(0, 4, 0));
+
+        GameObject newUnit = um.GetUnitOnTile(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        newUnit.GetComponent<UnitBehaviour>().SetOccupyingTile(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        um.requestCancel(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        Assert.IsNotNull(newUnit);
+        Assert.AreEqual(newUnit.name, "Spotter");
+
+        um.moveUnitToTile(newUnit, destTile);
+        um.CenterUnitToTile(newUnit, destTile);
+    }
+
+    [Test]
+    public void ValidateSpawnTransport()
+    {
+        // Use the Assert class to test conditions
+        GameObject go = GameObject.Find("State Manager");
+
+        BaseManager bm = go.GetComponent<BaseManager>();
+
+        UnitManager um = go.GetComponent<UnitManager>();
+
+        GridManager gm = go.GetComponent<GridManager>();
+
+        Assert.IsNotNull(bm);
+        Assert.IsNotNull(um);
+        Assert.IsNotNull(gm);
+
+        bm.CheckSpawn(12);
+
+        GameObject destTile = gm.getTile(new Vector3Int(0, 5, 0));
+
+        GameObject newUnit = um.GetUnitOnTile(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        newUnit.GetComponent<UnitBehaviour>().SetOccupyingTile(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        um.requestCancel(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        Assert.IsNotNull(newUnit);
+        Assert.AreEqual(newUnit.name, "Transport");
+
+        um.moveUnitToTile(newUnit, destTile);
+        um.CenterUnitToTile(newUnit, destTile);
+    }
+
+    [Test]
+    public void ValidateSpawnTanker()
+    {
+        // Use the Assert class to test conditions
+        GameObject go = GameObject.Find("State Manager");
+
+        BaseManager bm = go.GetComponent<BaseManager>();
+
+        UnitManager um = go.GetComponent<UnitManager>();
+
+        GridManager gm = go.GetComponent<GridManager>();
+
+        Assert.IsNotNull(bm);
+        Assert.IsNotNull(um);
+        Assert.IsNotNull(gm);
+
+        bm.CheckSpawn(6);
+
+        GameObject destTile = gm.getTile(new Vector3Int(0, 6, 0));
+
+        GameObject newUnit = um.GetUnitOnTile(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        newUnit.GetComponent<UnitBehaviour>().SetOccupyingTile(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        um.requestCancel(gm.getTile(new Vector3Int(22, 3, 0)));
+
+        Assert.IsNotNull(newUnit);
+        Assert.AreEqual(newUnit.name, "Tanker");
+
+        um.moveUnitToTile(newUnit, destTile);
+        um.CenterUnitToTile(newUnit, destTile);
     }
 }
