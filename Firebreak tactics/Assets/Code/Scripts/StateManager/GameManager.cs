@@ -65,15 +65,27 @@ public class GameManager : MonoBehaviour
         Lose
     }
 
-    private void Victory()
+    public void Victory()
     {
         VictoryUI.SetActive(true);
         PlayerUI.SetActive(false);
     }
 
-    private void Lose()
+    public void UnVictory()
+    {
+        VictoryUI.SetActive(false);
+        PlayerUI.SetActive(true);
+    }
+
+    public void Lose()
     {
         LoseUI.SetActive(true);
         PlayerUI.SetActive(false);
+    }
+
+    public void UnLose()
+    {
+        LoseUI.SetActive(false);
+        PlayerUI.SetActive(true);
     }
 }

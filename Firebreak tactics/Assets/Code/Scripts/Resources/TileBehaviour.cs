@@ -33,7 +33,7 @@ public class TileBehaviour : MonoBehaviour
     // tile traversal
     private int altitude = 1; // [1]low, [2]medium, [3]high 
     private int traversalCost; // cost of traversing the tile 
-    private int traversalRule; // [1]all units, [2]ground only, [3]air only, [4] no traversal
+    [SerializeField] private int traversalRule; // [1]all units, [2]ground only, [3]air only, [4] no traversal
     private Grid grid;
 
     // tile health

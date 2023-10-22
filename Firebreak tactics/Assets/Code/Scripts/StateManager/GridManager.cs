@@ -284,7 +284,9 @@ public class GridManager : MonoBehaviour
                     || unitType == 0 && neighbour.GetTraversalRule() == 3
                     || unitType == 1 && neighbour.GetTraversalRule() == 2
                     )
+                {
                     continue;
+                }
 
                 bool inToSearch = toSearch.Contains(neighbour);
 
@@ -322,6 +324,8 @@ public class GridManager : MonoBehaviour
         }
 
         output.Insert(0, new Vector2Int(outCurrent.cellPos.x, outCurrent.cellPos.y));
+
+        foreach (var tile in output) { print(tile); }
 
         return output;
     }
