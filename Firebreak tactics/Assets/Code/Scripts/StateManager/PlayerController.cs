@@ -32,9 +32,7 @@ public class PlayerController : MonoBehaviour
     private GameObject upTile = null;
     private GameObject downTile = null;
     private GameObject clickedUnit = null;
-    private bool dragging = false;
     private string actionRejected = "";
-    private Vector3 mouseStart;
     private ControllerInput controllerInput;
 
     private bool moveAction = false;
@@ -103,10 +101,14 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (Mouse.current.leftButton.ReadValue() == 0f){
-            handleMouseRelease();
+        if (Mouse.current.leftButton.wasPressedThisFrame){
+            handleLeftClick();
         }
 
+        if (Mouse.current.rightButton.wasPressedThisFrame)
+        {
+            handleRightClick();
+        }
 
         if (movingUnit)
         {
@@ -136,6 +138,67 @@ public class PlayerController : MonoBehaviour
                 previousTile = null;
             }    
         }
+    }
+
+    private void handleLeftClick(){
+        // checks a left click user input to see if the player is attempting an interaction or making
+        // a random input 
+
+        ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit)){
+            GameObject input = hit.collider.gameObject; // tile clicked
+
+            if (input.GetComponent<TileBehaviour>().IsOccupied()){
+                // if the left click input is made to a unit 
+                // will determine if it's a tanker action or a select action 
+
+                clickedUnit = unitManager.GetUnitOnTile(input); // unit of the tile  
+                displayUnitInterface(input);
+            }
+        }        
+    }
+
+    private void displayUnitInterface(GameObject tile){
+        // open the Unit Selection interface and let the user make a command 
+        selectUnit(tile.GetComponent<TileBehaviour>(), true);
+        displayUnitUI(true, tile.GetComponent<TileBehaviour>().GetOccupyingUnit());
+        displayWaterUI(false, null);
+    }
+
+    private void LeftClick(){
+        // determines what interaction is being made to the unit using left click
+        // called by handleLeftClick
+
+        if (upTile.GetComponent<TileBehaviour>().IsOccupied()){
+        // if the click is on a unit 
+            GameObject upUnit = unitManager.GetUnitOnTile(upTile);      
+            if (clickedUnit && clickedUnit != upUnit){
+                // if a unit was clicked and then a new unit is clicked
+                // specifically for tanker unit refilling other units
+
+                //if next to other vehicle
+                Vector3Int depPos = clickedUnit.GetComponent<UnitBehaviour>().getCellPos();
+                Vector3Int targetPos = upUnit.GetComponent<UnitBehaviour>().getCellPos();
+
+                if (GetDistance(depPos, targetPos) == 1)
+                    handleUnitInteraction();
+            }
+            else if (clickedUnit == null && upUnit){
+            // if there's no unit selected 
+                clickedUnit = upUnit;
+            }        
+        }
+        else if (clickedUnit){
+        // if a unit was previously clicked and a tile is clicked 
+            handleTileInteraction();
+        }  
+
+        closeInteraction();
+    }
+
+    private void handleRightClick(){
+
     }
 
     private void MoveUnit()
@@ -170,6 +233,10 @@ public class PlayerController : MonoBehaviour
     private void highlightUnit(TileBehaviour script, bool select){
         script.highlightTile(select);
         // change logic to fit the new display/highlight system 
+    }
+
+    private void selectUnit(TileBehaviour script, bool select){
+        script.selectTile(select);
     }
 
     private void highlightMovementTiles(TileBehaviour origin, int range, bool show)
@@ -274,42 +341,147 @@ public class PlayerController : MonoBehaviour
         unitCanvas.position = Input.mousePosition;
     }
 
+    public void interactButton(string button){
+        // reads inputs from the user interaction interface
+        Debug.Log(button);
+        interfaceHandler(button);
+    }
+
+    private void interfaceHandler(string button){
+        // processes inputs from the user interaction interface
+
+        UnitBehaviour unitScript = clickedUnit.GetComponent<UnitBehaviour>();
+        switch(button){
+            case "A":
+                Debug.Log("A");
+                actionHandler(checkInteraction());
+                break;
+            case "B":
+                Debug.Log("B");
+                moveCommand();
+                break;
+            case "C":
+                Debug.Log("C");
+                refillCommand();
+                break;
+            default: 
+                break;
+        }
+    }
+
+    private string checkInteraction(){
+        // determines what interaction the user commanded
+        
+        UnitBehaviour unitScript = clickedUnit.GetComponent<UnitBehaviour>();    
+        if (unitScript.getSupport()){
+            return "support";
+        }
+        else if (unitScript.getExtinguish()){
+            return "extinguish";
+        }
+        else if (unitScript.getPreventative()){
+            return "foam";
+        }
+        else{
+            return "";
+        }
+    }
+
+    private void actionHandler(string action){
+    // specifically handles support, extinguish, or foam action
+    
+        switch(action){
+            case "support":
+                // tanker function
+                break;
+            case "extinguish":
+                // extinguish function
+                break;
+            case "foam":
+                // foam function
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    private void moveCommand(){
+        // issues the move command 
+        if (!moveAction && !movingUnit){
+        // selecting a unit
+            selectUnit(clickedUnit);
+            moveAction = true;
+            UnitBehaviour unitScript = clickedUnit.GetComponent<UnitBehaviour>();
+            highlightMovementTiles(unitScript.GetOccupyingTile().GetComponent<TileBehaviour>(),
+                unitScript.GetMovements(), 
+                true);
+        }
+    }
+
+    private void refillCommand(){
+
+    }
+
     private void displayUnitUI(bool active, GameObject unit){
         RectTransform unitCanvas = UnitUI.GetComponent<RectTransform>();
         UnitUI.enabled = active;
         if (unit){
+
             UnitBehaviour unitScript = unit.GetComponent<UnitBehaviour>();
-            Transform water = UnitUI.transform.Find("water");
-            Transform movement  = UnitUI.transform.Find("movement");
-            Transform actions  = UnitUI.transform.Find("actions");
-            Transform unitName  = UnitUI.transform.Find("unit");
-            TMP_Text waterText = water.GetComponent<TMP_Text>();
-            TMP_Text movementText = movement.GetComponent<TMP_Text>(); 
-            TMP_Text actionsText = actions.GetComponent<TMP_Text>(); 
-            TMP_Text unitText = unitName.GetComponent<TMP_Text>(); 
 
-            if (waterText != null)
-            {
-                waterText.text = "water: [" +unitScript.getWater() + "/" + unitScript.getCapacity()+"]";
+            Transform displayA = UnitUI.transform.Find("displayA");
+            TMP_Text displayAText = displayA.GetComponent<TMP_Text>();
+
+            Transform displayB = UnitUI.transform.Find("displayB");
+            TMP_Text displayBText = displayB.GetComponent<TMP_Text>();
+
+            Transform displayC = UnitUI.transform.Find("displayC");
+            TMP_Text displayCText = displayC.GetComponent<TMP_Text>();
+
+            Transform displayD = UnitUI.transform.Find("displayD");
+            TMP_Text displayDText = displayD.GetComponent<TMP_Text>();
+
+            displayAText.text = "movements: " + unitScript.getMovements();
+
+            if (unitScript.getSupport() || unitScript.getPreventative() || unitScript.getExtinguish()){
+                // if the unit is anything but a scout
+                unitCanvas.sizeDelta = new Vector2(unitCanvas.sizeDelta.x, 175f);
+
+                displayBText.text = "range: " + unitScript.getRange();
+                displayCText.text = "actions: " + unitScript.getActions();
+
+                if (unitScript.getWater() > 0){
+                    displayDText.text = "water: " + unitScript.getWater() + "/" + unitScript.getCapacity();
+                }
+                else{
+                    displayDText.text = "water: empty";
+                }
+                
             }
+            else{
+                // scouts don't need to display range, actions, or water
 
-            if (movementText != null)
-            {
-                movementText.text = "movements: " +unitScript.getMovements();
-            }
+                unitCanvas.sizeDelta = new Vector2(unitCanvas.sizeDelta.x, 130f);
 
-            if (actionsText != null)
-            {
-                actionsText.text = "actions: " +unitScript.getActions();
-            }
-
-            if (unitText != null)
-            {
-                unitText.text = unit.name + " unit";
+                displayBText.text = "";
+                displayCText.text = "";
+                displayDText.text = "";
             }
         }
         unitCanvas.gameObject.SetActive(active);
-        unitCanvas.position = Input.mousePosition;
+
+        // mouse offset with Unit Button interface below unit
+        Vector3 desiredPosition = Input.mousePosition + new Vector3(0f, -unitCanvas.rect.height+50f, 0f); 
+
+        // clamp to the bounds of the screen to not overlap existing UI
+        Vector3 clampedPosition = new Vector3(
+            Mathf.Clamp(desiredPosition.x, 150f, Screen.width - unitCanvas.rect.width - 100f),
+            Mathf.Clamp(desiredPosition.y, unitCanvas.rect.width - 90f, Screen.height - unitCanvas.rect.height),
+            desiredPosition.z
+        );
+
+        unitCanvas.position = clampedPosition;
     }
 
     private void checkMouseOverTile(GameObject selected, TileBehaviour script){
@@ -324,18 +496,13 @@ public class PlayerController : MonoBehaviour
 
                 if (selected.GetComponent<TileBehaviour>().IsOccupied()){
                 // if the selected tile is occupied by a unit 
-                    highlightUnit(script, true);
-                    displayUnitUI(true, selected.GetComponent<TileBehaviour>().GetOccupyingUnit());
-                    displayWaterUI(false, null);
+                    highlightUnit(selected.GetComponent<TileBehaviour>(), true);
                 }
                 else if (selected.name == "Water"){
                     displayWaterUI(true, selected);
-                    displayUnitUI(false, null);
                 }
                 else{
                     //highlightUnit(script, false);
-                    displayUnitUI(false, null);
-                    displayWaterUI(false, null);
                 }
                 if (previousTile){
                     if (previousTile.GetComponent<TileBehaviour>().IsOccupied())
@@ -413,6 +580,7 @@ public class PlayerController : MonoBehaviour
                 
                     downTile = hit.collider.gameObject;
 
+                
                     if (Mouse.current.rightButton.ReadValue() == 1f){
                         // RMB is down
                         
@@ -426,7 +594,6 @@ public class PlayerController : MonoBehaviour
                                 selectUnit(downTile);
                                 moveAction = true;
 
-
                                 highlightMovementTiles(downTile.GetComponent<TileBehaviour>(),
                                     unitManager.GetUnitOnTile(downTile).GetComponent<UnitBehaviour>().GetMovements(), 
                                     true);
@@ -439,23 +606,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void handleMouseRelease(){
-        ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit)){
-            upTile = hit.collider.gameObject;
-
-            if (downTile == upTile){
-            // mouse is released on same tile
-                handleMouseClick();
-            }
-        }
-        if (dragging){
-            dropUnit();
-        }
-        mouseUp();
-    }
-        
     private void handleUnitInteraction(){
 
         // unit to unit interaction
@@ -472,18 +622,8 @@ public class PlayerController : MonoBehaviour
         closeInteraction();   
     }
 
-    private void mouseUp(){
-        //selectedTile = null;
-        //previousTile = null;
-        mouseStart = Vector3.zero; 
-        dragging = false;
-    }
-
     private void closeInteraction(){
-    // close all unit interactions when an interaction is concluded
-
         actionRejected = "";
-        dragging = false;  
         clickedUnit = null;
         upTile = null;
         downTile = null;
@@ -495,19 +635,21 @@ public class PlayerController : MonoBehaviour
         TileBehaviour tileScript = upTile.GetComponent<TileBehaviour>();
         UnitBehaviour unitScript = clickedUnit.GetComponent<UnitBehaviour>();
 
-        Vector3Int depPos = unitScript.getCellPos();
-        Vector3Int targetPos = tiles.WorldToCell(upTile.transform.position);
+        //print(GetDistance(unitScript.getCellPos(), tiles.WorldToCell(upTile.transform.position)));
 
-        GameObject depTile = gridManager.getTile(depPos);
-        if (moveAction) {
+        if (moveAction) 
+        {
             
-            if (upTile.name != "Fire" && upTile.name != "Water" && !tileScript.IsOccupied() && !tileScript.isBaseTile()){
+            if (upTile.name != "Fire" && upTile.name != "Water" && !tileScript.IsOccupied() && !tileScript.isBaseTile())
+            {
                 //get distance
+                Vector3Int depPos = unitScript.getCellPos();
+                Vector3Int targetPos = tiles.WorldToCell(upTile.transform.position);
 
                 if (GetDistance(depPos, targetPos) <= unitScript.GetMovements())
                 {
                     //find path
-                    
+                    GameObject depTile = gridManager.getTile(depPos);
 
                     movePath = gridManager.FindPath(depTile.GetComponent<TileBehaviour>(),
                         tileScript, unitScript.GetTraversalType());
@@ -531,7 +673,11 @@ public class PlayerController : MonoBehaviour
             if (unitScript.getWater() > 0){
                 // if the unit has water 
 
-                if (GetDistance(depPos, targetPos) <= unitScript.GetRange())
+                //if in range
+                Vector3Int depPos = unitScript.getCellPos();
+                Vector3Int targetPos = tiles.WorldToCell(upTile.transform.position);
+
+                if (GetDistance(depPos, targetPos) <= unitScript.getRange())
                     unitManager.interactFire(clickedUnit, upTile);
             }
             else{
@@ -542,6 +688,10 @@ public class PlayerController : MonoBehaviour
         // water tile (refill)
             if (tileScript.getCapacity() > 0 && (unitScript.getWater() < unitScript.getCapacity())){
                 // if the tile has water left 
+
+                //if next to water
+                Vector3Int depPos = unitScript.getCellPos();
+                Vector3Int targetPos = tiles.WorldToCell(upTile.transform.position);
 
                 if (GetDistance(depPos, targetPos) == 1)
                     unitManager.interactTile(clickedUnit, upTile);  
@@ -554,36 +704,7 @@ public class PlayerController : MonoBehaviour
         else{
             actionRejected = "tile cannot be interacted with"; // check where this occurs, make edge cases for it 
         }
-
-        highlightMovementTiles(depTile.GetComponent<TileBehaviour>(), 50, false); // forces all highlights to be removed 
         closeInteraction();
-    }
-
-
-    private void handleMouseClick(){
-    // mouse click
-        if (upTile.GetComponent<TileBehaviour>().IsOccupied()){
-        // if the click is on a unit 
-            GameObject upUnit = unitManager.GetUnitOnTile(upTile);      
-            if (clickedUnit && clickedUnit != upUnit){
-                // if a unit was clicked and then a new unit is clicked
-
-                //if next to other vehicle
-                Vector3Int depPos = clickedUnit.GetComponent<UnitBehaviour>().getCellPos();
-                Vector3Int targetPos = upUnit.GetComponent<UnitBehaviour>().getCellPos();
-
-                if (GetDistance(depPos, targetPos) == 1)
-                    handleUnitInteraction();
-            }
-            else if (clickedUnit == null && upUnit){
-            // if there's no unit selected 
-                clickedUnit = upUnit;
-            }        
-        }
-        else if (clickedUnit){
-        // if a unit was previously clicked and a tile is clicked 
-            handleTileInteraction();
-        }    
     }
 
     private void dropUnit(){
@@ -615,7 +736,7 @@ public class PlayerController : MonoBehaviour
                     UnitBehaviour unitBehaviour = unitTransform.GetComponent<UnitBehaviour>();
                     unitBehaviour.setOriginPos();
                 }
-            }
+    }
         }
     }
 

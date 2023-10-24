@@ -91,7 +91,7 @@ public class UnitBehaviour : MonoBehaviour
     	this.water = this.water - water;
     }
 
-    public int GetRange()
+    public int getRange()
     {
         return range;
     }
