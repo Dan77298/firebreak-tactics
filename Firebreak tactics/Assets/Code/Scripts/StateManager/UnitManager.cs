@@ -79,6 +79,23 @@ public class UnitManager : MonoBehaviour
         return false;
     }
 
+    public bool canRefill(GameObject unit){
+        // Get the tile position of the unit
+        Vector3Int tilePos = unit.GetComponent<UnitBehaviour>().getCellPos();
+        
+        // Get neighboring tiles
+        List<GameObject> neighbours = gridManager.getNeighbours(tilePos);
+        foreach (GameObject tile in neighbours){
+            if (tile.name == "Water"){  
+                TileBehaviour waterTile = tile.GetComponent<TileBehaviour>();
+                if (waterTile.getCapacity() > 0){
+                    return true;
+                }
+            }
+        }
+        return false; // The unit cannot refill water.
+    }
+
     public void requestCancel(GameObject target){
         TileBehaviour script = target.GetComponent<TileBehaviour>();
         List<GameObject> queueRemove = new List<GameObject>();
