@@ -39,15 +39,29 @@ public class TileManager : MonoBehaviour
 
     private void GameStateChanged(GameManager.GameState _state){
     // all actions before the game gives the player their first turn
-        if (_state == GameManager.GameState.ProduceTerrain)
-        {
-            //Debug.Log("ProduceTerrain");
+        if (_state == GameManager.GameState.ProduceTerrain){
             updateFireTiles();
             gridManager.initializeGrid();
             gridManager.updateNeighbourLookup();
             GameManager.Instance.UpdateGameState(GameManager.GameState.PreTurn, null);
         }
+
+        if (_state == GameManager.GameState.PreTurn){
+            disableBorder();
+        }
         countTiles();
+    }
+
+    public void disableBorder(){
+        // removes highlight for all fire and water tiles at end of turn
+        foreach (Transform child in gridTiles.transform){
+                TileBehaviour tileScript = child.GetComponent<TileBehaviour>();
+                if (tileScript.IsOccupied()){
+                    // if the unit is a tile
+                    tileScript.removePriority();
+                }
+                tileScript.disableBorder();      
+        }
     }
 
     public void updateFireTiles(){

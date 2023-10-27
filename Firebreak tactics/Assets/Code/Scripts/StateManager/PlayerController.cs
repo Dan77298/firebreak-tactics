@@ -30,9 +30,9 @@ public class PlayerController : MonoBehaviour
     private Ray ray; 
     private GameObject previousTile = null;
     private GameObject selectedTile = null;
-    private GameObject downTile = null;
     private GameObject clickedUnit = null;
     private GameObject upTile = null;
+    private string actionType = "";
     private string actionRejected = "";
     private ControllerInput controllerInput;
 
@@ -43,7 +43,7 @@ public class PlayerController : MonoBehaviour
     private GameObject unitToMove = null; //reference to clickedUnit when move made as
                                           //clickedUnit sets to null as a bug outside of move update
                                           //for unknown reasons
-    private float moveTime = 1f;
+    private float moveTime = 0.5f;
     private float moveTimeElapsed = 0f;
 
     private Vector2 camMoveVector;
@@ -57,7 +57,6 @@ public class PlayerController : MonoBehaviour
         controllerInput.Enable();
 
         GameManager.OnGameStateChanged += GameStateChanged;
-        Click.action.performed += HandleMouseDown;
 
         controllerInput.Controls.Move.performed += OnMovementPerformed;
         controllerInput.Controls.Move.canceled += OnMovementCanceled;
@@ -70,7 +69,6 @@ public class PlayerController : MonoBehaviour
         controllerInput.Disable();
 
         GameManager.OnGameStateChanged -= GameStateChanged;
-        Click.action.performed -= HandleMouseDown;
 
         controllerInput.Controls.Move.performed -= OnMovementPerformed;
         controllerInput.Controls.Move.canceled -= OnMovementCanceled;
@@ -153,18 +151,15 @@ public class PlayerController : MonoBehaviour
         {
             GameObject newTile = hit.collider.gameObject; // tile clicked
 
-            if (!movingUnit)
-            {
-                if (newTile.GetComponent<TileBehaviour>().IsOccupied())
-                {
+            if (!movingUnit){
+                if (newTile.GetComponent<TileBehaviour>().IsOccupied()){
                     // if the click is on a unit 
-                    if (clickedUnit != null && selecting)
-                    {
+                    if (clickedUnit != null && selecting){
                         // if an interaction is being made 
-                        if (clickedUnit != unitManager.GetUnitOnTile(newTile))
-                        {
+                        if (clickedUnit != unitManager.GetUnitOnTile(newTile)){
+                            // for any other unit than the first unit
                             Vector3Int depPos = clickedUnit.GetComponent<UnitBehaviour>().getCellPos();
-                            Vector3Int targetPos = newTile.GetComponent<UnitBehaviour>().getCellPos();
+                            Vector3Int targetPos = unitManager.GetUnitOnTile(newTile).GetComponent<UnitBehaviour>().getCellPos();
 
                             if (GetDistance(depPos, targetPos) == 1)
                             {
@@ -172,9 +167,13 @@ public class PlayerController : MonoBehaviour
                                 closeAction();
                             }
                         }
+                        else
+                        {
+                            clickedUnit = unitManager.GetUnitOnTile(newTile); // unit of the tile  
+                            displayUnitInterface(newTile);
+                        }
                     }
-                    else if (clickedUnit == null)
-                    {
+                    else if (clickedUnit == null){
                         // no unit has been selected yet 
                         clickedUnit = unitManager.GetUnitOnTile(newTile); // unit of the tile  
                         displayUnitInterface(newTile);
@@ -185,7 +184,15 @@ public class PlayerController : MonoBehaviour
                     if (clickedUnit && selecting)
                     {
                         // if the click is on a tile 
+                        highlightMovementTiles(clickedUnit.GetComponent<UnitBehaviour>().GetOccupyingTile().GetComponent<TileBehaviour>(), 
+                        50, false);
                         handleTileInteraction(newTile);
+                        if (!movingUnit){
+                            // end all actions other than move actions, they end elsewhere
+                            selecting = false;
+                            clickedUnit = null;
+                            prompt.SetActive(false);
+                        }
                     }
                 }
             }
@@ -228,8 +235,6 @@ public class PlayerController : MonoBehaviour
         // if a unit was previously clicked and a tile is clicked 
             //handleTileInteraction(null);
         }  
-
-        closeInteraction();
     }
 
     private void handleRightClick(){
@@ -239,7 +244,7 @@ public class PlayerController : MonoBehaviour
             newAction();
             displayUnitUI(true, clickedUnit);
         }
-        else if (clickedUnit){
+        else if (clickedUnit && !movingUnit){
             // if the interface is open 
             displayUnitUI(false, null);
             clickedUnit = null;
@@ -252,6 +257,7 @@ public class PlayerController : MonoBehaviour
 
         if (moveTimeElapsed < 0f)
         {
+            prompt.SetActive(false);
             //move to next tile
             moveTimeElapsed = moveTime;
 
@@ -314,9 +320,14 @@ public class PlayerController : MonoBehaviour
                 Vector3Int currentPos = tileBehaviour.getCellPos();
 
                 if (tileBehaviour != origin)
-                    tileBehaviour.highlightTile(show);
-                
-
+                    if (actionType == "extinguish"){
+                        Debug.Log(actionType);
+                        tileBehaviour.highlightFireTile(show);
+                    }
+                    else{
+                        tileBehaviour.highlightTile(show);
+                    }
+                    
                 processed.Add(tileBehaviour);
 
                 //add neighbours to tosearch
@@ -340,8 +351,31 @@ public class PlayerController : MonoBehaviour
                             !toSearch.Contains(candidate) && !toAdd.Contains(candidate))
                         {
                             //rule check
-                            if (candidate.GetTraversalRule() == 1 || candidate.GetTraversalRule() == 2)
-                                toAdd.Add(candidate);
+                            if (actionType == "move"){
+                               if ((candidate.GetTraversalRule() == 1 || candidate.GetTraversalRule() == 2) && !candidate.GetOnFire())
+                                toAdd.Add(candidate); 
+                            }
+                            else if (actionType == "extinguish"){
+                                if (candidateGO.name == "Fire" && candidate.GetOnFire()){
+                                    toAdd.Add(candidate);
+                                }
+                            }
+                            else if (actionType == "foam"){
+                                if (candidateGO.name != "Fire" && candidateGO.name != "Water"){
+                                    toAdd.Add(candidate);
+                                }
+                            }
+                            else if (actionType == "support"){
+                                if (candidate.IsOccupied() && origin != candidateGO){
+                                    toAdd.Add(candidate);
+                                }
+                            }
+                            else if (actionType == "refill"){
+                                if (candidateGO.name == "Water"){
+                                    toAdd.Add(candidate);
+                                }
+                            }
+                            
                         }
                     }
                 }
@@ -362,24 +396,14 @@ public class PlayerController : MonoBehaviour
         WaterUI.enabled = active;
         if (tile){
             TileBehaviour tileScript = tile.GetComponent<TileBehaviour>();
-            Transform tilename = WaterUI.transform.Find("tile");
             Transform actions = WaterUI.transform.Find("actions");
-            TMP_Text tileText = tilename.GetComponent<TMP_Text>();
             TMP_Text actionsText = actions.GetComponent<TMP_Text>();
 
-            if (tileText != null)
-            {
-                tileText.text = "water tile";
+            if (tileScript.getCapacity() > 0){
+                actionsText.text = "" + tileScript.getCapacity();
             }
-
-            if (actionsText != null)
-            {
-                if (tileScript.getCapacity() > 0){
-                    actionsText.text = "capacity: " +tileScript.getCapacity();
-                }
-                else{
-                    actionsText.text = "empty";
-                }
+            else{
+                actionsText.text = "";
             }
         }
         unitCanvas.gameObject.SetActive(active);
@@ -421,8 +445,12 @@ public class PlayerController : MonoBehaviour
     }
 
     private void newAction(){
-        highlightMovementTiles(clickedUnit.GetComponent<UnitBehaviour>().GetOccupyingTile().GetComponent<TileBehaviour>(), 
-            50, false);
+        if (clickedUnit){
+            // erase any pre-existing radius tiles if a unit is still pre-selected
+          highlightMovementTiles(clickedUnit.GetComponent<UnitBehaviour>().GetOccupyingTile().GetComponent<TileBehaviour>(), 
+            50, false);  
+        }
+        
         movingUnit = false;
         moveAction = false;
         selecting = false;
@@ -434,6 +462,8 @@ public class PlayerController : MonoBehaviour
         // handles action closure via unit interface
         Debug.Log("closeAction");
         newAction();
+        actionType = "";
+        actionRejected = "";
         clickedUnit = null;        
     }
 
@@ -442,12 +472,15 @@ public class PlayerController : MonoBehaviour
         
         UnitBehaviour unitScript = unit.GetComponent<UnitBehaviour>();    
         if (unitScript.getSupport()){
+            actionType = "support";
             return "support";
         }
         else if (unitScript.getExtinguish()){
+            actionType = "extinguish";
             return "extinguish";
         }
         else if (unitScript.getPreventative()){
+            actionType = "foam";
             return "foam";
         }
         else{
@@ -460,7 +493,7 @@ public class PlayerController : MonoBehaviour
     
         switch(action){
             case "support":
-                adjacentCommand();
+                rangeCommand();
                 break;
             case "extinguish":
                 rangeCommand();
@@ -477,6 +510,7 @@ public class PlayerController : MonoBehaviour
     private void moveCommand(){
         // display the movement grid 
         selectUnit(clickedUnit);
+        actionType = "move";
         moveAction = true;
         UnitBehaviour unitScript = clickedUnit.GetComponent<UnitBehaviour>();
         highlightMovementTiles(unitScript.GetOccupyingTile().GetComponent<TileBehaviour>(),
@@ -485,7 +519,7 @@ public class PlayerController : MonoBehaviour
     }
 
     private void rangeCommand(){
-        // display the range grid 
+        // display the range grid
         UnitBehaviour unitScript = clickedUnit.GetComponent<UnitBehaviour>();
         highlightMovementTiles(unitScript.GetOccupyingTile().GetComponent<TileBehaviour>(),
                 unitScript.getRange(), 
@@ -494,6 +528,7 @@ public class PlayerController : MonoBehaviour
 
     private void adjacentCommand(){
         // display the adjacent grid 
+        actionType = "refill";
         UnitBehaviour unitScript = clickedUnit.GetComponent<UnitBehaviour>();
         highlightMovementTiles(unitScript.GetOccupyingTile().GetComponent<TileBehaviour>(),
                 1, 
@@ -539,6 +574,14 @@ public class PlayerController : MonoBehaviour
 
             // display texts
             displayAText.text = "movements: " + unitScript.getMovements();
+            if (unitScript.getMovements() > 0){
+                displayAText.color = Color.white;
+                ActionAText.color = Color.white;
+            }
+            else{
+                displayAText.color = Color.red;
+                 ActionAText.color = Color.red;
+            }
 
             if (unitScript.getSupport() || unitScript.getPreventative() || unitScript.getExtinguish()){
                 // if the unit is anything but a scout
@@ -546,12 +589,22 @@ public class PlayerController : MonoBehaviour
 
                 displayBText.text = "range: " + unitScript.getRange();
                 displayCText.text = "actions: " + unitScript.getActions();
+                if (unitScript.getActions() > 0 || (unitScript.getWater() <= 0 && unitScript.getSupport())){
+                    displayCText.color = Color.white;
+                     ActionBText.color = Color.white;
+                }
+                else{
+                    displayCText.color = Color.red;
+                    ActionBText.color = Color.red;
+                }
 
                 if (unitScript.getWater() > 0){
                     displayDText.text = "water: " + unitScript.getWater() + "/" + unitScript.getCapacity();
+                    displayDText.color = Color.white;
                 }
                 else{
                     displayDText.text = "water: empty";
+                    displayDText.color = Color.red;
                 }
                 
             }
@@ -568,8 +621,17 @@ public class PlayerController : MonoBehaviour
             //action texts
             ActionBText.text = checkInteraction(unit);
 
-            if (checkInteraction(unit) == ""){
-                // if the unit can't prevent, extinguish, or refill others
+            if (unitScript.getMovements() <= 0){
+                // if unit is out of moves
+                interactA.gameObject.SetActive(false);
+            }
+            else{
+                interactA.gameObject.SetActive(true);
+            }
+
+            if ((checkInteraction(unit) == "" || unitScript.getActions() <= 0) || (unitScript.getSupport() && unitScript.getWater() <= 0)){
+                // if the unit can't perform an action, or is out of actions
+                // if the tanker unit is out of water
                 interactB.gameObject.SetActive(false);
             }
             else{
@@ -605,7 +667,7 @@ public class PlayerController : MonoBehaviour
                     displayWaterUI(true, selected);
                 }
                 else{
-                    //highlightUnit(script, false);
+                    displayWaterUI(false, null);
                 }
                 if (previousTile){
                     if (previousTile.GetComponent<TileBehaviour>().IsOccupied())
@@ -670,61 +732,14 @@ public class PlayerController : MonoBehaviour
         Camera.main.fieldOfView = Mathf.Clamp(Camera.main.fieldOfView - scrollWheel * zoomSpeed, minZoom, maxZoom);
     }
 
-    private void HandleMouseDown(InputAction.CallbackContext context){
-        // fired when left or right mouse button down
-        
-        if (currentState == GameManager.GameState.PlayerTurn){
-            if (context.action == Click.action){
-                ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-                RaycastHit hit;
-
-                if (Physics.Raycast(ray, out hit)){
-                
-                    downTile = hit.collider.gameObject;
-
-                
-                    if (Mouse.current.rightButton.ReadValue() == 1f){
-                        // RMB is down
-                        
-                        unitManager.requestCancel(downTile);
-
-                        if (belongsTo(downTile, tiles.transform)){
-                        // tile is clicked
-                            if (!moveAction && !movingUnit && downTile.GetComponent<TileBehaviour>().IsOccupied()){
-                            // selecting a unit
-                                Debug.Log("selectUnit"); 
-                                selectUnit(downTile);
-                                moveAction = true;
-
-                                highlightMovementTiles(downTile.GetComponent<TileBehaviour>(),
-                                    unitManager.GetUnitOnTile(downTile).GetComponent<UnitBehaviour>().GetMovements(), 
-                                    true);
-
-                            }
-                        } 
-                    }  
-                }
-            }
-        }
-    }
-
     private void handleUnitInteraction(GameObject upUnit){
-
         // unit to unit interaction
         GameObject unit = unitManager.GetUnitOnTile(upUnit);
 
         if (clickedUnit.GetComponent<UnitBehaviour>().getSupport()){
         // if the interaction is to refill another unit 
             unitManager.interactUnit(clickedUnit, upUnit);
-        }
-        closeInteraction();   
-    }
-
-    private void closeInteraction(){
-        actionRejected = "";
-        //clickedUnit = null;
-        downTile = null;
-        moveAction = false;
+        }   
     }
 
     private void handleTileInteraction(GameObject tile){
@@ -738,6 +753,7 @@ public class PlayerController : MonoBehaviour
             {        
                 if (tile.name != "Fire" && tile.name != "Water" && !tileScript.IsOccupied() && !tileScript.isBaseTile())
                 {
+                    Debug.Log("move tile");
                     //get distance
                     Vector3Int depPos = unitScript.getCellPos();
                     Vector3Int targetPos = tiles.WorldToCell(tile.transform.position);
@@ -802,16 +818,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void dropUnit(){
-        // drop the unit on the tile
-        GameObject unit = unitManager.GetUnitOnTile(downTile);
-        unitManager.moveUnitToTile(unit, upTile);
-        downTile.GetComponent<TileBehaviour>().highlightTile(false);
-        unitManager.CenterUnitToTile(unit, upTile);
-    }
-
-
-
     private void selectUnit(GameObject tile){
         selectedTile = tile;
     }
@@ -824,7 +830,7 @@ public class PlayerController : MonoBehaviour
     // set unit positions at start of turn 
         currentState = newState;
         if (currentState == GameManager.GameState.PlayerTurn){
-            closeInteraction();
+            closeAction();
             foreach (Transform unitTransform in units.transform){
             // set all unit originPos
                 if (unitTransform.tag == "Unit"){

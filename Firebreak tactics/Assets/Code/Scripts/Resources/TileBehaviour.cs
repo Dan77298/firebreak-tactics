@@ -15,6 +15,7 @@ public class TileBehaviour : MonoBehaviour
     private bool onEmber = false; // is the tile embering 
     private bool burned = false; // is the tile fully depleted naturally 
     private bool hasEmbered = false; // has the tile used its ember state 
+    private bool priority = false; // override highlights 
     private int prevent = 0; // how many turns of preventative the tile has 
     private int capacity = 0; // for water tiles 
     [SerializeField] public Vector3Int cellPos;
@@ -24,6 +25,7 @@ public class TileBehaviour : MonoBehaviour
     [SerializeField] private Material highlightedMaterial;
     [SerializeField] private Material selectedMaterial;
     [SerializeField] private Material foamMaterial; // for foam tiles
+    [SerializeField] private Material emberMaterial; // for fire tiles
 
     [SerializeField] public GameObject borderPrefab;
     [SerializeField] private bool unitBase = false; // the unit spawner tile 
@@ -214,28 +216,40 @@ public class TileBehaviour : MonoBehaviour
     //Enable the border prefab to indicate the tile has been highlighted
     public void highlightTile(bool highlight){
         // sets highlighted on a tile
-        if (highlight)
-        {
-
-            if (borderInstance != null)
-            {
+        if (highlight && !priority){
+            if (borderInstance != null){
                 // Change Material
                 borderInstance.GetComponent<Renderer>().material = highlightedMaterial;
                 // Enable Border
                 borderInstance.GetComponent<Renderer>().enabled = true;
-
             }
-
         }
-        else
-        {
-            if (borderInstance != null)
-            {
+        else{
+            if (borderInstance != null && !priority){
                 // Disable Border
                 borderInstance.GetComponent<Renderer>().enabled = false;
             }
+        } 
+    }
+
+    //Enable the border prefab to indicate the tile has been highlighted
+    public void highlightFireTile(bool highlight){
+        // sets highlighted on a tile
+        if (highlight){
+            if (borderInstance != null){
+                // Change Material to emberMaterial
+                priority = true;
+                borderInstance.GetComponent<Renderer>().material = emberMaterial;
+                // Enable Border
+                borderInstance.GetComponent<Renderer>().enabled = true;
+            }
         }
-       
+        else{
+            if (borderInstance != null){
+                // Disable Border
+                borderInstance.GetComponent<Renderer>().enabled = false;
+            }
+        } 
     }
 
     // Enable the border prefab to indicate the tile has been selected
@@ -264,15 +278,12 @@ public class TileBehaviour : MonoBehaviour
     }
 
     // Enable the border prefab to indicate the tile has been foamed
-    public void foamTile(bool foam)
-    {
-        Debug.Log("foamTile called");
-        if (foam)
-        {
-            Debug.Log("BorderInstance: "+ borderInstance);
+    public void foamTile(bool foam){
+        if (foam){
             if (borderInstance != null)
             {
                 // Change Material
+                priority = true;
                 borderInstance.GetComponent<Renderer>().material = foamMaterial;
                 // Enable Border
                 borderInstance.GetComponent<Renderer>().enabled = true;
@@ -280,9 +291,18 @@ public class TileBehaviour : MonoBehaviour
             }
         } else
         {
-            // Disable Border
-            borderInstance.GetComponent<Renderer>().enabled = false;
+            disableBorder();
         }
+    }
+
+    public void disableBorder(){
+        if (prevent <= 0){
+            borderInstance.GetComponent<Renderer>().enabled = false; 
+        }
+    }
+
+    public void removePriority(){
+        priority = false;
     }
 
     public bool isBaseTile(){

@@ -22,6 +22,8 @@ public class UnitBehaviour : MonoBehaviour
    	[SerializeField] private Vector3Int originPos; // position before the end of turn
 
     private int water;
+    private bool refillingWater = false;
+    private int actionLimit;
     private GameObject occupyingTile = null;
     private Grid grid;
 
@@ -29,6 +31,7 @@ public class UnitBehaviour : MonoBehaviour
     {
         grid = transform.parent.GetComponent<Grid>();
         water = capacity;
+        actionLimit = actions;
         setOriginPos();
     }
 
@@ -61,6 +64,13 @@ public class UnitBehaviour : MonoBehaviour
     	return preventative;
     }
 
+    public bool getFillingWater(){
+        return refillingWater;
+    }
+    public void fillingWater(bool set){
+        refillingWater = set;
+    }
+
     public bool getExtinguish(){
     	return extinguish;
     }
@@ -73,8 +83,16 @@ public class UnitBehaviour : MonoBehaviour
         return movements;
     }
 
+    public void resetActions(){
+        actions = actionLimit;
+    }
+
     public int getActions(){
         return actions;
+    }
+
+    public void useAction(){
+        actions--;
     }
 
 

@@ -126,5 +126,6 @@ MonoBehaviour:
   highlightedMaterial: {fileID: 2100000, guid: 03843e606033e66469c0ebc7a8931ddd, type: 2}
   selectedMaterial: {fileID: 2100000, guid: cbdd26a956e37434d8e5b78b3a694c59, type: 2}
   foamMaterial: {fileID: 2100000, guid: a7f4b89f4ed0b4f48858851706ca94e2, type: 2}
+  emberMaterial: {fileID: 2100000, guid: 869ef4e0fa070f04a983d7e4d6545f53, type: 2}
   borderPrefab: {fileID: 6675104577715339971, guid: f51ad74a4ee1d4444ae942349159594f, type: 3}
   unitBase: 0

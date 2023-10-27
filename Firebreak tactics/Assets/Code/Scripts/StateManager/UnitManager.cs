@@ -8,7 +8,7 @@ public class UnitManager : MonoBehaviour
     [SerializeField] private Grid unitsGrid;
     [SerializeField] private Grid tilesGrid;
 
-    private Dictionary<GameObject, GameObject> unitActions = new Dictionary<GameObject, GameObject>();
+    private Dictionary<GameObject, List<GameObject>> unitActions = new Dictionary<GameObject, List<GameObject>>();
 
     void Awake(){ 
         GameManager.OnGameStateChanged += GameStateChanged;
@@ -19,7 +19,7 @@ public class UnitManager : MonoBehaviour
         GameManager.OnGameStateChanged -= GameStateChanged;
     }
 
-    public Dictionary<GameObject, GameObject> getActions(){
+    public Dictionary<GameObject, List<GameObject>> getActions(){
         return unitActions;
     }
 
@@ -44,7 +44,7 @@ public class UnitManager : MonoBehaviour
         return null;
     } 
 
-    public Dictionary<GameObject, GameObject> getUnitActions(){
+    public Dictionary<GameObject, List<GameObject>> getUnitActions(){
         return unitActions;
     }
 
@@ -67,12 +67,12 @@ public class UnitManager : MonoBehaviour
         unit.transform.position = adjustedNewPosition;
     }
 
-    public bool duplicateAction(GameObject target){
-    // returns whether the target is already a set action 
-        foreach (var action in unitActions)
-        {
-            if (action.Key == target || action.Value == target)
-            {
+    public bool duplicateAction(GameObject unit, GameObject target){
+        // returns whether the target is already a set action 
+
+        if (unitActions.ContainsKey(unit)){
+            List<GameObject> targetList = unitActions[unit];
+            if (targetList.Contains(target)){
                 return true;
             }
         }
@@ -81,14 +81,19 @@ public class UnitManager : MonoBehaviour
 
     public bool canRefill(GameObject unit){
         // Get the tile position of the unit
-        Vector3Int tilePos = unit.GetComponent<UnitBehaviour>().getCellPos();
-        
+        Debug.Log("try refill");
+        UnitBehaviour unitScript = unit.GetComponent<UnitBehaviour>();
+        Vector3Int tilePos = unitScript.GetOccupyingTile().GetComponent<TileBehaviour>().getCellPos();
+        Debug.Log(tilePos);
         // Get neighboring tiles
         List<GameObject> neighbours = gridManager.getNeighbours(tilePos);
         foreach (GameObject tile in neighbours){
+            Debug.Log(tile.name);
             if (tile.name == "Water"){  
+                Debug.Log("water neighbour");
                 TileBehaviour waterTile = tile.GetComponent<TileBehaviour>();
-                if (waterTile.getCapacity() > 0){
+                if (waterTile.getCapacity() > 0 && unitScript.getWater() < unitScript.getCapacity() && !unitScript.getFillingWater()){
+                    // if the water source is not empty, the unit can be refilled, and unit is not refilling already
                     return true;
                 }
             }
@@ -96,62 +101,53 @@ public class UnitManager : MonoBehaviour
         return false; // The unit cannot refill water.
     }
 
-    public void requestCancel(GameObject target){
-        TileBehaviour script = target.GetComponent<TileBehaviour>();
-        List<GameObject> queueRemove = new List<GameObject>();
-
-        if (target != null && script != null){
-            foreach (var action in unitActions){
-                if (action.Key == target || action.Value == target){
-                    queueRemove.Add(action.Key);
-                }
-                else if (script.GetOccupyingUnit() != null){
-                    // Check if action.Key and action.Value are equal to script.GetOccupyingUnit() without null checks
-                    if (action.Key == script.GetOccupyingUnit() || action.Value == script.GetOccupyingUnit()){
-                        queueRemove.Add(action.Key);
-                    }
-                }
-            }
-
-            foreach (var entry in queueRemove){
-                Debug.Log("Action canceled");
-                unitActions.Remove(entry);
-            }
-        }
-    }
-
     private void setAction(GameObject unit, GameObject target){
-    // Check if the x GameObject already exists as a key in the dictionary.
+        // adds action to list 
+        UnitBehaviour unitScript = unit.GetComponent<UnitBehaviour>();
+
         if (!unitActions.ContainsKey(unit)){
-        // if unit action is new
-            Debug.Log("new action: " + unit + ", " + target);
-            unitActions.Add(unit, target);
+            unitActions[unit] = new List<GameObject>();
         }
-        else{
-        // if unit already has an action 
-            Debug.Log("update action: " + unit);
-            unitActions[unit] = target;
-        }
+
+        // Add the target to the list associated with the unit.
+        unitActions[unit].Add(target);
+
+        Debug.Log("new action: " + unit + ", " + target);
+        unitScript.useAction();
     }
 
     public void interactTile(GameObject unit, GameObject target){
     // issue an action for the unit to that tile 
-        if (unit.GetComponent<UnitBehaviour>().getPreventative() && !duplicateAction(target)){
+        UnitBehaviour unitScript = unit.GetComponent<UnitBehaviour>();
+
+        if (target.name == "Water" && !duplicateAction(unit, target) && !unitScript.getFillingWater()){
+            // refill unit from water tile, only allow one refill per unit
+            target.GetComponent<TileBehaviour>().foamTile(true);
+            unitScript.fillingWater(true);
+            setAction(unit,target);
+        }
+        else if (unit.GetComponent<UnitBehaviour>().getPreventative() && !duplicateAction(unit, target)){
+            // foam a tile
+            target.GetComponent<TileBehaviour>().foamTile(true);
             setAction(unit,target);
         }
     }
 
     public void interactFire(GameObject unit, GameObject target){
     // issue an action for the unit to that tile
-       if (unit.GetComponent<UnitBehaviour>().getExtinguish() && !duplicateAction(target)){
+       if (unit.GetComponent<UnitBehaviour>().getExtinguish() && !duplicateAction(unit, target)){
+            TileBehaviour tile = target.GetComponent<TileBehaviour>();
+            tile.highlightFireTile(true);
             setAction(unit,target);
         } 
     }
 
     public void interactUnit(GameObject unit, GameObject target){
     // issue an action for the unit to that unit
-        if (!duplicateAction(target)){
+        if (!duplicateAction(unit, target)){
         //isSupport() is checked when determining click 
+            TileBehaviour tile = target.GetComponent<TileBehaviour>();
+            tile.foamTile(true);
             setAction(unit, target);
         }
     }
@@ -188,9 +184,6 @@ public class UnitManager : MonoBehaviour
         GameObject oldTile = unitScript.GetOccupyingTile();
 
         // remove any actions associated with this move 
-        requestCancel(unit);
-        requestCancel(oldTile);
-        requestCancel(newTile);
 
         if (oldTile != null){
             oldTile.GetComponent<TileBehaviour>().SetOccupyingUnit(null);
@@ -228,24 +221,21 @@ public class UnitManager : MonoBehaviour
         if (newState == GameManager.GameState.PreTurn)
         {
             initializeUnitPositions();
-            unitActions.Clear();
-        }
-        else if (newState == GameManager.GameState.PlayerTurn)
-        {
-            //reset all unit movement, actions, etc.
             ResetUnitStats();
+            unitActions.Clear();
         }
     }
 
-    public void ResetUnitStats()
-    {
+    public void ResetUnitStats(){
+        // called before player turn
         foreach (Transform unitTransform in unitsGrid.transform)
         {
             // for all units       
             if (unitTransform.tag == "Unit")
             {
                 UnitBehaviour unit = unitTransform.gameObject.GetComponent<UnitBehaviour>();
-
+                unit.resetActions();
+                unit.fillingWater(false);
                 unit.SetMovements(unit.GetMaxMovements());
             }
         }

@@ -100,32 +100,39 @@ public class FireManager : MonoBehaviour
     }
 
     private void handleUnitActions(){
-        foreach (var action in unitManager.getUnitActions()){
-        // check all actions 
-            TileBehaviour targetScript = action.Value.GetComponent<TileBehaviour>();
-            UnitBehaviour unitScript = action.Key.GetComponent<UnitBehaviour>();
-            if (action.Value != null && action.Key != null){
-                if (targetScript.GetOccupyingUnit() && unitScript.getSupport()){
-                // if the action is between two units 
-                    unitManager.transferWater(action.Key, unitManager.GetUnitOnTile(action.Value));
-                }
-                else if (unitScript.getExtinguish() && (action.Value.name == "Fire" || action.Value.name == "Ember")){
-                // if the action is an extinguish 
-                    tileManager.Extinguish(action.Value);
-                    unitScript.useWater(1);
-                }
-                else if (action.Value.name == "Water"){
-                // if the action is to refill unit
-                    unitManager.refillUnit(action.Key, action.Value);
-                }
-                else if (unitScript.getPreventative()){
-                // if the action is a preventative 
-                    if (action.Value.name != "Fire" && action.Value.name != "Water" && action.Value.name != "Ember" && action.Value.name != "Road"){
-                        TileBehaviour tileScript = action.Value.GetComponent<TileBehaviour>();
-                        Debug.Log(action.Value);
-                        tileImmunities.Add(action.Value);
-                        tileScript.applyFoam(5);
+        // sorts actions by entry and performs all actions 
+        foreach (var unitActionPair in unitManager.getUnitActions()){
+            GameObject unit = unitActionPair.Key;
+            List<GameObject> targets = unitActionPair.Value;
+
+            foreach (var target in targets){
+                TileBehaviour targetScript = target.GetComponent<TileBehaviour>();
+                UnitBehaviour unitScript = unit.GetComponent<UnitBehaviour>();
+
+                if (target != null && unit != null){
+
+                    if (targetScript.GetOccupyingUnit() && unitScript.getSupport()){
+                        // Action between two units, transfer water.
+                        unitManager.transferWater(unit, unitManager.GetUnitOnTile(target));
+                    }
+                    else if (unitScript.getExtinguish() && (target.name == "Fire" || target.name == "Ember")){
+                        // Extinguish action.
+                        tileManager.Extinguish(target);
                         unitScript.useWater(1);
+                    }
+                    else if (target.name == "Water"){
+                        // Refill unit action.
+                        unitManager.refillUnit(unit, target);
+                    }
+                    else if (unitScript.getPreventative()){
+                        // Preventative action.
+                        if (target.name != "Fire" && target.name != "Water" && target.name != "Ember" && target.name != "Road")
+                        {
+                            TileBehaviour tileScript = target.GetComponent<TileBehaviour>();
+                            tileImmunities.Add(target);
+                            tileScript.applyFoam(5);
+                            unitScript.useWater(1);
+                        }
                     }
                 }
             }
@@ -153,7 +160,6 @@ public class FireManager : MonoBehaviour
             tileImmunities.Remove(tile);
         }
     }
-
 
     private void GameStateChanged(GameManager.GameState _state)
     {
